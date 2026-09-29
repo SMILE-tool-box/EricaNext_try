@@ -1,0 +1,8 @@
+*~
+.DS_Store
+build/
+install/
+*:Zone.Identifier
+notebooks/.ipynb_checkpoints/
+notebooks/*.root
+notebooks/run_chain.py
