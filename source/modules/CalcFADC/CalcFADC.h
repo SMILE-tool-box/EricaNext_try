@@ -39,6 +39,12 @@ class CalcFADC : public BasicModule {
  private:
   double           *Q_anode, *Q_cathode;
   double            base_window, threshold;
+  // SMILE_tool_box CalcFADC: charge *= ADC_to_mV * Clock_to_nsec / 50.
+  double            ADC_to_mV, Clock_to_nsec;
+  // SMILE_tool_box CalcFADC: integration window is [Range_min, Range_max),
+  // NOT [base_window, Nclk) -- defaults 30/500, not registered in this
+  // run's setting.mac so the code defaults apply.
+  double            Range_min, Range_max;
   TH2D             *BaseAnode, *BaseCathode;
   TH2D             *ChargeAnode, *ChargeCathode;
   TH1D            **Spec1Hit_A, **Spec1Hit_C;

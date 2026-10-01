@@ -3,6 +3,10 @@
 ANLStatus CalcFADC::mod_define(){
   define_parameter("base_window", &mod_class::base_window);
   define_parameter("threshold", &mod_class::threshold);
+  define_parameter("ADC_to_mV", &mod_class::ADC_to_mV);
+  define_parameter("Clock_to_nsec", &mod_class::Clock_to_nsec);
+  define_parameter("Range_min", &mod_class::Range_min);
+  define_parameter("Range_max", &mod_class::Range_max);
 
   return AS_OK;
 }
@@ -86,10 +90,13 @@ ANLStatus CalcFADC::mod_analyze(){
     Spec1Hit_C[area]->Fill(Q_anode[C_ID]);    
   }
 
-  if(A_ID<0 || C_ID<0){
+  // SMILE_tool_box CalcFADC::Process() never skips the chain on "no hit"
+  // (only on a missing Anode_Data/Cathode_Data packet, which the upstream
+  // evs flags already guarantee by the time this module runs); it just
+  // continues with charge == -100-ish sentinels and lets later modules see
+  // Q_anode/Q_cathode as-is. Flag it for diagnostics, but always continue.
+  if(A_ID<0 || C_ID<0)
     set_evs("FADC_NoHit");
-    return AS_SKIP;
-  }
 
   return AS_OK;
 }
@@ -103,14 +110,25 @@ void CalcFADC::IntegWave(bool c_flag, unsigned Nid){
 
     for(int ch=0; ch<4; ch++){
       double mean=0, charge=0;
-    
+      int n_over=0;
+
+      // SMILE_tool_box CalcFADC::Process(): sum over [BASE_MIN,BASE_MAX)
+      // first, then divide once.
       for(int clk=0; clk<base_window; clk++)
-	mean += wave[ch*Nclk+clk]/base_window;
-      for(int clk=TMath::FloorNint(base_window); clk<Nclk; clk++){
-	if(wave[ch*Nclk+clk] - mean > threshold){
-	  charge += wave[ch*Nclk+clk] - mean;
+	mean += (double)wave[ch*Nclk+clk];
+      mean /= base_window;
+      for(int clk=TMath::FloorNint(Range_min); clk<Range_max; clk++){
+	if((double)wave[ch*Nclk+clk] - mean > threshold){
+	  charge += (double)wave[ch*Nclk+clk] - mean;
+	  n_over++;
 	}
       }
+      // SMILE_tool_box: a channel with no sample above threshold gets the
+      // charge sentinel -100 (before the unit conversion, i.e. -80 after it).
+      // TPC_Calibration then uses it as-is if strips on that panel fired.
+      if(n_over == 0)  charge = -100;
+      // SMILE_tool_box CalcFADC::Process(): ADU -> charge unit conversion
+      charge *= ADC_to_mV * Clock_to_nsec / 50.;
 
       if(c_flag){
 	Q_cathode[4*id+ch] = charge;
@@ -142,6 +160,10 @@ ANLStatus CalcFADC::mod_finalize(){
 CalcFADC::CalcFADC(){
   base_window = 30;
   threshold = 20;
+  ADC_to_mV = 2.;
+  Clock_to_nsec = 20.;
+  Range_min = 30.;
+  Range_max = 500.;
 }
 
 CalcFADC::~CalcFADC(){

@@ -19,6 +19,12 @@ class MDF {
   ~MDF();
 
   void    SetParameters(const char*, int);
+  // SMILE_tool_box HA_Calc_s2::Init(): XMDF_HA%02d.dat/YMDF_HA%02d.dat are a
+  // flat 110-double-per-PMT TMultiDimFit dump (npar, nterm, mean, tMean[2],
+  // tMin[2], tMax[2], tCof[0..nterm-1] from index 10, tPow[i*npar+j] from
+  // index 60), unlike the older header+variable-length format SetParameters()
+  // reads. Populates the same internal arrays ConvertMDF() evaluates.
+  void    SetParametersFlat(const char*, int);
   double  ConvertMDF(int, double*);
 
  private:

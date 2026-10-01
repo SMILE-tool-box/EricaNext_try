@@ -3,8 +3,6 @@
 
 #include <anlnext/BasicModule.hh>
 #include <sstream>
-#include <vector>
-#include <TTree.h>
 
 #include "SaveFile.h"
 #include "ReadData.h"
@@ -25,6 +23,18 @@ class TPC_Calibration : public BasicModule {
   ANLStatus mod_finalize() override;
 
   double    Get_Energy()  const {return Energy;};
+  // debug: total strip-level coincidences this event, and the largest
+  // single (anode-panel, cathode-panel) aggregated hit count seen.
+  int       Get_NCoinci()   const {return Coinci_A ? (int)Coinci_A->GetEntries() : 0;};
+  int       Get_MaxPanelHit() const {
+    int m = 0;
+    for(int v : HitPanel) if(v > m) m = v;
+    return m;
+  };
+  int       Get_Na() const {return Na;};
+  int       Get_Nc() const {return Nc;};
+  int       Get_HitPanel(int i, int j) const {return HitPanel.at(i*Nc+j);};
+
 
  private:
   const ReadData       *RawData = nullptr;
@@ -32,17 +42,22 @@ class TPC_Calibration : public BasicModule {
 
   int                   max_anode, max_cathode, max_clock;
   int                   Na, Nc;
+  int                   strip_num_chip_a, strip_num_chip_c;
   double                Energy;
-  std::vector<int>      HitPanel;
+
+  // SMILE_tool_box TPC_Calibration::TPC_Anode_Cathode_Hit: per-event
+  // anode-strip x cathode-strip coincidence count (reset every event).
+  std::vector<int>      AnodeCathodeHit;   // [max_anode*max_cathode]
+  // SMILE_tool_box TPC_Calibration::TPC_Panel_Hit: per-event, per
+  // (anode ADC panel, cathode ADC panel) aggregated hit count, built from
+  // AnodeCathodeHit with a 4-strip edge exclusion on both axes.
+  std::vector<int>      HitPanel;          // [Na*Nc]
+  std::vector<int>      CountHitPanel;     // [Na], sum over j of HitPanel[i][j] with HitPanel[i][j] > 100
   std::vector<double>   cal_a, cal_b;
+  double                Cal_Modify;
   TH2D                 *Image_XY;
-  // TH2D                 *Image_XYZ;
   TH2C                 *Coinci_A, *Coinci_C;
   std::string           PrmFile;
-  bool                  no_cal_data;
-  bool                  Coinci_TH;
-  bool                  Image_XY_TH;
-  bool                  Spectrum_TH;
   TH1D                 *Spectrum;
 };
 

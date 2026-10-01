@@ -8,6 +8,8 @@
 #include "ReadData.h"
 #include "HA_Calc.h"
 #include "TPC_Calibration.h"
+#include "CalcFADC.h"
+#include "TOT_Skewness.h"
 
 using namespace anlnext;
 
@@ -25,6 +27,13 @@ class Reconstruct : public BasicModule {
   
  private:
   TTree        *tree;
+  unsigned      event_id;
+  unsigned      sevt_id;
+  int           loopback;  // debug: ReadData's IDcheck_Loopback evs for this event
+  int           n_coinci, max_panel_hit;  // debug: TPC_Calibration internals
+  int           dbg_min_a, dbg_max_a, dbg_min_c, dbg_max_c, dbg_min_d, dbg_max_d;
+  double        dbg_qa[12], dbg_qc[12];
+  int           dbg_hitpanel[144];
   double        Eg, Pg[3], Vg[3];
   double        Ke, Pe[3], Ve[3];
   double        E0, V0[3];
@@ -32,10 +41,26 @@ class Reconstruct : public BasicModule {
   double        psi_kin;
   double        alpha_kin, alpha_lim;
   double        mc2;
-  
+  // SMILE_tool_box Reconstruct/s2t: err_flag (0 = SingleHit reconstructed)
+  // and phi_kin/psi_kin/alp_kin in DEGREES (Compton_common::angle_scatter,
+  // angle_recoil, Alpha_kin), 0xffffffff when not reconstructed.
+  int           err_flag;
+  double        phi_deg, psi_deg, alpha_deg;
+  // more SMILE_tool_box s2t branches, same names / shapes / update rules
+  double        Pe_TRA[6], Ve_TRA[6], Len_TRA;
+  int           Ve_TRA_fit_status[2];
+  double        Ve_TRA_grad_err[2];
+  double        Track_Min[3], Track_Max[3];
+  double        skewness_x, skewness_y;
+  short         HA_Pixel[8];
+  short         Hit_Flag_Num;
+  double        TOT_Area[2];
+
   const ReadData*         RawData = nullptr;
   const HA_Calc*          HA2p_data = nullptr;
   const TPC_Calibration*  TPC_FADC = nullptr;
+  const CalcFADC*         Q_TPC = nullptr;
+  const TOT_Skewness*     TRA = nullptr;
 };
 
 #endif

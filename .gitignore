@@ -6,3 +6,4 @@ install/
 notebooks/.ipynb_checkpoints/
 notebooks/*.root
 notebooks/run_chain.py
+run_script/*.root

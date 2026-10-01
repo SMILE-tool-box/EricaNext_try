@@ -25,8 +25,11 @@ class TPC_Encoder {
   unsigned    TrackSize()                  {return track.size();};
   int         TrackData(int ntr)           {return track[ntr];};
   short       FADC_data(int a, int b)      {return fadc[a][b];};
-  
+  // header word at bytes 8..11 (SMILE_tool_box RawRead2p: anode_time[])
+  unsigned    EventTime() const            {return evt_time;};
+
  private:
+  unsigned         evt_time = 0;
   std::string      FileName(bool);
   unsigned         ReadData(int&);
   unsigned         ReadData(int&, unsigned);

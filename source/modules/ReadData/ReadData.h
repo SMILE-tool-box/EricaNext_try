@@ -32,6 +32,13 @@ public:
   int       Get_Npmt_HA2p()  const {return 6;};
   int       Get_Nch_HA2p()   const {return 4;};
   void      Get_ADC_HA2p(int ha, short *data)  const;
+  // SMILE_tool_box HA_Center_Gravity::Process(): the masked 12-bit ADC
+  // value is kept and summed into HA_RAW_E even when the hardware error
+  // bit is set (the error bit only ever affects HA_Hit_Flag, not HA_RAW_E).
+  // Get_ADC_HA2p() above instead replaces errored channels with -1, which
+  // loses that raw value; this variant preserves it and reports the error
+  // flags (same 24-entry butterfly-offset order) separately.
+  void      Get_ADC_HA2p_Raw(int ha, short *data, bool *err) const;
   const std::vector<int>*  Get_HA2pID()  const {return &N_HA2p;};
 
   void      Get_TPC_FADC(bool c_flag, int id, short *data) const;
@@ -40,11 +47,22 @@ public:
   const std::vector<int>*  Get_CathodeID()  const {return &N_cathode;};
   const TH2C*              Get_Track_A()    const {return Track_A;};
   const TH2C*              Get_Track_C()    const {return Track_C;};
-
-  struct Hit { short strip; short clock; };
-  const std::vector<Hit>& Get_Anode_Hits()   const { return anode_hits_; }
-  const std::vector<Hit>& Get_Cathode_Hits() const { return cathode_hits_; }
-
+  // SMILE_tool_box RawRead2p: the synchronized hardware trigger counter
+  // shared by all boards for this merged event (same quantity as the
+  // reference's anode_id[]), usable as a cross-run comparison key.
+  unsigned                 Get_EventID()    const {return event_id_;};
+  // SMILE_tool_box RawRead2p: SEvt_ID, a plain 0-based count of merged
+  // events processed so far (no duplicates possible, unlike the hardware
+  // trigger counter above) -- the most reliable cross-run join key.
+  unsigned                 Get_SEvtID()     const {return sevt_id_;};
+  // SMILE_tool_box RawRead2p "Anode_Time": header time word of anode board
+  // `i` (units of 0.1 ms; TOT_Skewness_Analysis uses anode_time[0]/1e4/3600
+  // [hour] to look up the time-dependent drift velocity).
+  unsigned                 Get_AnodeTime(int i) const {return Anode[i]->EventTime();};
+  // SMILE_tool_box TPC_Calibration "TOT_Area" (nhit[2]): number of
+  // (strip, clock) hit bits in this event, anode / cathode.
+  double                   Get_NHitA()      const {return n_hit_a_;};
+  double                   Get_NHitC()      const {return n_hit_c_;};
   int                GetMinAnode()    const {return min_a;};
   int                GetMaxAnode()    const {return max_a;};
   int                GetMinCathode()  const {return min_c;};
@@ -68,6 +86,10 @@ public:
   
   std::vector<int>  N_anode, N_cathode, N_HA2p;
   std::vector<unsigned> Event_ID;
+  unsigned          event_id_ = 0;
+  unsigned          sevt_id_ = 0;
+  unsigned          next_sevt_id_ = 0;
+  double            n_hit_a_ = 0, n_hit_c_ = 0;
   
   TPC_Encoder     **Anode, **Cathode;
   TH2D             *Image_A, **FADC_Wave_A;
@@ -75,7 +97,6 @@ public:
   TH2C             *Track_A, *Track_C;
   int               min_a, max_a, min_c, max_c;
   int               min_ad, max_ad, min_cd, max_cd;
-  std::vector<Hit>  anode_hits_, cathode_hits_;
   void              Scan_Encoder();
   void              Read_Anode();
   void              Read_Cathode();

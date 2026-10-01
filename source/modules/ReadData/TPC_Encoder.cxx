@@ -9,8 +9,8 @@ int TPC_Encoder::GetEventID(unsigned& eid){
     if(flag)
       return 2;
   }while(header!=0xeb901964);
-  unsigned N_trg = ReadData(flag);
-  unsigned N_time = ReadData(flag);
+  ReadData(flag);                 // trigger counter (unused)
+  evt_time = ReadData(flag);
   unsigned N_gso = ReadData(flag);
 
   unsigned check = ReadData(flag);

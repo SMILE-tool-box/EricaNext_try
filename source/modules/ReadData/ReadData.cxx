@@ -102,7 +102,8 @@ ANLStatus ReadData::mod_analyze(){
 	set_evs("IDcheck_Loopback");
       }
   }while(loop_flag!=1);
-  
+  event_id_ = max_id;
+
   ////////////////////////////////////////////////
   // Read Data...
   if(is_evs_defined("Anode_Data")){
@@ -119,7 +120,8 @@ ANLStatus ReadData::mod_analyze(){
       set_evs("ClearPulse80256");
     }
   }
-  
+  sevt_id_ = next_sevt_id_++;
+
   return AS_OK;
 }
 

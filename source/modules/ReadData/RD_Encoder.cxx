@@ -62,10 +62,10 @@ void ReadData::Scan_Encoder(){
 
 void ReadData::Read_Anode(){
   Track_A->Reset("ICES");
-  anode_hits_.clear();
+  n_hit_a_ = 0;
   min_a = 128 * N_anode.size();  max_a = -1;
   min_ad = 1024;  max_ad = -1;
-
+  
   for(unsigned i=0; i<N_anode.size(); i++){
     if(exist_module("SaveFile")){
       if(Anode[i]->TrackSize()){
@@ -76,12 +76,14 @@ void ReadData::Read_Anode(){
 	  int clk = (Anode[i]->TrackData(j)) & 0x7ff;
 	  for(int ch=0; ch<4; ch++){
 	    for(int bit=0; bit<32; bit++){
-	      char str_data = ((Anode[i]->TrackData(j+ch+1)) >> (31-bit)) & 0x1;
+	      char str_data;
+	      if(Reverse) str_data = ((Anode[i]->TrackData(j+ch+1)) >> (31-bit)) & 0x1;
+	      else        str_data = ((Anode[i]->TrackData(j+ch+1)) >> bit) & 0x1;
 	      if(str_data){
 		int n_strip = (int)i*128+32*ch+bit;
-			anode_hits_.push_back({(short)n_strip, (short)clk});
 		Image_A->Fill(n_strip, clk);
 		Track_A->Fill(n_strip, clk);
+		n_hit_a_++;
 		if(min_a>n_strip)  min_a = n_strip;
 		if(max_a<n_strip)  max_a = n_strip;
 		if(min_ad>clk)     min_ad= clk;
@@ -97,7 +99,7 @@ void ReadData::Read_Anode(){
 
 void ReadData::Read_Cathode(){
   Track_C->Reset("ICES");
-  cathode_hits_.clear();
+  n_hit_c_ = 0;
   min_c = 128 * N_cathode.size();  max_c = -1;
   min_cd = 1024;  max_cd = -1;
   
@@ -111,12 +113,14 @@ void ReadData::Read_Cathode(){
 	  int clk = (Cathode[i]->TrackData(j)) & 0x7ff;
 	  for(int ch=0; ch<4; ch++){
 	    for(int bit=0; bit<32; bit++){
-	      char str_data = ((Cathode[i]->TrackData(j+ch+1)) >> (31-bit)) & 0x1;
+	      char str_data;
+	      if(Reverse) str_data = ((Cathode[i]->TrackData(j+ch+1)) >> (31-bit)) & 0x1;
+	      else        str_data = ((Cathode[i]->TrackData(j+ch+1)) >> bit) & 0x1;
 	      if(str_data){
 		int n_strip = (int)i*128+32*ch+bit;
-			cathode_hits_.push_back({(short)n_strip, (short)clk});
 		Image_C->Fill(n_strip, clk);
 		Track_C->Fill(n_strip, clk);
+		n_hit_c_++;
 		if(min_c>n_strip)  min_c = n_strip;
 		if(max_c<n_strip)  max_c = n_strip;
 		if(min_cd>clk)     min_cd= clk;

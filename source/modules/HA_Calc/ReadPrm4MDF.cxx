@@ -8,17 +8,21 @@ bool HA_Calc::ReadPrm4MDF(){
   }
   
   for(unsigned i=0; i<ha_id->size(); i++){
+    // SMILE_tool_box HA_Calc_s2::Init(): XMDF_HA%02d.dat / YMDF_HA%02d.dat,
+    // a flat 110-double-per-PMT TMultiDimFit dump.
     std::stringstream xs;
-    xs << PrmDir << "/MDF_HA"
+    xs << PrmDir << "/XMDF_HA"
        << std::setw(2) << std::setfill('0') << (*ha_id)[i]
-       << "_X.dat";
-    mdf_x[i] = new MDF(xs.str().c_str(), N_PMT);
+       << ".dat";
+    mdf_x[i] = new MDF();
+    mdf_x[i]->SetParametersFlat(xs.str().c_str(), N_PMT);
 
     std::stringstream ys;
-    ys << PrmDir << "/MDF_HA"
+    ys << PrmDir << "/YMDF_HA"
        << std::setw(2) << std::setfill('0') << (*ha_id)[i]
-       << "_Y.dat";
-    mdf_y[i] = new MDF(ys.str().c_str(), N_PMT);
+       << ".dat";
+    mdf_y[i] = new MDF();
+    mdf_y[i]->SetParametersFlat(ys.str().c_str(), N_PMT);
 
     if(exist_module("SaveFile")){
       char histname[100];

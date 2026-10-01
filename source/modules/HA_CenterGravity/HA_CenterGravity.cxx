@@ -43,6 +43,7 @@ ANLStatus HA_CenterGravity::mod_initialize(){
   gr_x = new double[N_HA * N_PMT];
   gr_y = new double[N_HA * N_PMT];
   gr_e = new double[N_HA * N_PMT];
+  raw_e = new double[N_HA * N_PMT];
   
   return AS_OK;
 }
@@ -54,18 +55,15 @@ ANLStatus HA_CenterGravity::mod_analyze(){
   for(std::thread &t: threads)
     t.join();
     
+  // SMILE_tool_box HA_Center_Gravity::Process() never skips the chain here
+  // (it computes HA_Hit_Flag per pixel and always continues); these evs
+  // flags are diagnostics only.
   hit_ID.clear();
   for(int i=0; i<N_HA*N_PMT; i++){
-    if(gr_e[i] > 0)       hit_ID.push_back(i);
-    else if(evs("HA2p_overflow") || evs("HA2p_data_lack"))
-      return AS_SKIP;
+    if(gr_e[i] > 0)  hit_ID.push_back(i);
   }
-  if(hit_ID.size() == 0){
-    set_evs("HA2p_no_hit");
-    return AS_SKIP;
-  }
-
   switch(hit_ID.size()){
+  case 0:  set_evs("HA2p_no_hit");     break;
   case 1:  set_evs("HA2p_SingleHit");  break;
   case 2:  set_evs("HA2p_DoubleHit");  break;
   default: set_evs("HA2p_Over3hits");
@@ -76,25 +74,34 @@ ANLStatus HA_CenterGravity::mod_analyze(){
 
 void HA_CenterGravity::CG_Process(int id){
   short adc[24];
-  RawData->Get_ADC_HA2p(id, adc);
+  bool  err[24];
+  RawData->Get_ADC_HA2p_Raw(id, adc, err);
 
   for(int pmt=0; pmt<N_PMT; pmt++){
-    double eng=0;
+    double eng=0, raw=0;
     short n_flag=0;
-      
+    bool has_error=false;
+
     for(int ch=0; ch<N_ADC; ch++){
-      if(adc[N_ADC*pmt+ch] > overflow){
+      short val = adc[N_ADC*pmt+ch];
+      // SMILE_tool_box HA_Center_Gravity::Process(): HA_RAW_E always sums
+      // the masked ADC value, independent of the per-channel error bit.
+      raw += val;
+      if(err[N_ADC*pmt+ch])  has_error = true;
+
+      if(val > overflow){
 	std::lock_guard<std::mutex> lock(key);
 	set_evs("HA2p_overflow");
       }
-      else if(adc[N_ADC*pmt+ch] > threshold){
-	eng += adc[N_ADC*pmt+ch];
+      else if(val >= threshold){
+	eng += val;
 	n_flag++;
       }
     }
+    raw_e[N_PMT*id+pmt] = raw;
 
     gr_e[N_PMT*id+pmt] = -1;
-    if(n_flag==4){
+    if(!has_error && n_flag==4){
       gr_e[N_PMT*id+pmt] = eng;
       gr_x[N_PMT*id+pmt]
 	= ((adc[N_ADC*pmt+0] + adc[N_ADC*pmt+1])
@@ -124,7 +131,7 @@ void HA_CenterGravity::Hit_Info(int id, int &ha, int &pmt,
 }
 
 ANLStatus HA_CenterGravity::mod_finalize(){
-  delete [] gr_x;  delete [] gr_y;  delete [] gr_e;
+  delete [] gr_x;  delete [] gr_y;  delete [] gr_e;  delete [] raw_e;
 
   return AS_OK;
 }
