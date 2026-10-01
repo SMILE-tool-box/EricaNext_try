@@ -13,36 +13,45 @@
 ## 解析チェーン
 
 ```mermaid
-flowchart TB
-    raw[("生データ<br/>uTPC_anode/cathode*.raw<br/>HA*.raw")]
+flowchart TD
+  RAW[("生データ<br>uTPC_anode/cathode*.raw, HA*.raw")]
+  subgraph L0["層0 入力"]
+    RD["ReadData<br>読み込み・ボード間のイベント同期"]
+  end
+  subgraph L1["層1 検出器ごとの処理"]
+    CF[CalcFADC] --> TC[TPC_Calibration]
+    TOT[TOT_Skewness]
+    HG[HA_CenterGravity] --> HC[HA_Calc]
+  end
+  subgraph L2["層2 イベント再構成"]
+    REC[Reconstruct]
+  end
+  subgraph L3["層3 出力"]
+    OUT["Reconstruct/single_hit<br>再構成 TTree"]
+    RAWT["RawTreeWriter/raw<br>同期済み生データ TTree"]
+  end
+  PRM["パラメータファイル<br>Calibration20190130.dat<br>MDF・HA 較正値<br>drift_velocity.dat"]
 
-    subgraph chain["再構成チェーン(上から順に実行)"]
-        RD["<b>ReadData</b><br/>読み込み・ボード間のイベント同期"]
-        FADC["<b>CalcFADC</b><br/>FADC 波形 → 電荷"]
-        TPCC["<b>TPC_Calibration</b><br/>アノード×カソード同時計数<br/>→ 反跳電子エネルギー Ke"]
-        HACG["<b>HA_CenterGravity</b><br/>PMT 4 ch → 重心"]
-        HAC["<b>HA_Calc</b><br/>MDF 変換・ピクセル同定<br/>→ Eg, 吸収点 Pg"]
-        TOT["<b>TOT_Skewness</b><br/>電子飛跡<br/>→ 散乱点 Pe, 方向 Ve, 飛程 Len"]
-        REC["<b>Reconstruct</b><br/>まとめて 1 イベント 1 行<br/>運動学 φ, ψ, α"]
-        RD --> FADC --> TPCC --> HACG --> HAC --> TOT --> REC
-    end
-
-    RTW["<b>RawTreeWriter</b><br/>(較正・診断用。ReadData の直後につなぐ)"]
-
-    raw --> RD
-    RD -. "TPC ヒット" .-> TPCC
-    RD -. "TPC ヒット" .-> TOT
-    RD --> RTW
-    TPCC -. "Ke" .-> REC
-    HAC -. "Eg, Pg" .-> REC
-
-    REC --> out1[("Reconstruct/single_hit<br/>(TTree)")]
-    RTW --> out2[("RawTreeWriter/raw<br/>同期済み生データ (TTree)")]
-    out1 --> ana["イベント選択・イメージング<br/>tutorials/EventSelection, Backprojection_caldata"]
-    out2 --> cal["ゲインマップ・較正・ドリフト速度<br/>各モジュールの診断図"]
+  RAW --> RD
+  PRM -.-> TC
+  PRM -.-> HC
+  PRM -.-> TOT
+  RD -- "FADC 波形" --> CF
+  RD -- "TPC ヒット" --> TC
+  RD -- "TPC ヒット・時刻" --> TOT
+  RD -- "HA の ADC" --> HG
+  CF -- "電荷" --> TC
+  HG -- "重心・生エネルギー" --> HC
+  TC -- "Ke" --> REC
+  HC -- "Eg, Pg, ピクセル" --> REC
+  TOT -- "Pe, Ve, Len" --> REC
+  REC --> OUT
+  RD -- "RawTreeWriter<br>（較正・診断用）" --> RAWT
 ```
 
-- 実線はチェーンの実行順、点線は主なデータの受け渡しです。
+- 矢印はデータの受け渡しです(ラベルは渡すもの)。点線はパラメータファイルの読み込みです。
+- 実際の実行順は `ReadData → CalcFADC → TPC_Calibration → HA_CenterGravity → HA_Calc → TOT_Skewness → Reconstruct`
+  (SMILE_tool_box の `setting.mac` と同じ)。`RawTreeWriter` は使うときだけ `ReadData` の直後につなぎます。
 - 出力ファイルには TTree だけを書きます(図は保存しません)。処理の中身を確かめる図は、
   `RawTreeWriter/raw` と `Reconstruct/single_hit` から後で描きます(`tutorials/DataIO/modules/`)。
 - どのモジュールも、失敗してもチェーンを止めずにセンチネル値(`0xffffffff`)を入れて続行します。
