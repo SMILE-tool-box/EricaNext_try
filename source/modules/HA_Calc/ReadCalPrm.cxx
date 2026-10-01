@@ -1,33 +1,7 @@
 #include "HA_Calc.h"
 
 bool HA_Calc::ReadCalPrm(){
-  if(exist_module("SaveFile")){
-    Spec_PMT = new TH2D* [N_PMT * (ha_id->size())];
-
-    for(unsigned i=0; i<ha_id->size(); i++){
-      for(int j=0; j<N_PMT; j++){
-	char histname[100];
-	sprintf(histname, "Spectrum_HA%02d_PMT%d", (*ha_id)[i], j);
-		
-	if(cal_flag){
-	  Spec_PMT[N_PMT*i+j]
-	    = new TH2D(histname, histname,
-		       4096, -0.5, 16383.5,  64, -0.5, 63.5);
-	  Spec_PMT[N_PMT*i+j]->SetXTitle("[ADU]");
-	  Spec_PMT[N_PMT*i+j]->SetYTitle("pixel id");
-	}
-	else{
-	  Spec_PMT[N_PMT*i+j]
-	    = new TH2D(histname, histname,
-		       2000, 0, 4000,  64, -0.5, 63.5);
-	  Spec_PMT[N_PMT*i+j]->SetXTitle("Energy [keV]");
-	  Spec_PMT[N_PMT*i+j]->SetYTitle("Pixel ID");	  
-	}
-      }
-    }
-  }
-
-  if(!cal_flag){
+  {
     cal_a = new double [64* N_PMT * (ha_id->size())];
     cal_b = new double [64* N_PMT * (ha_id->size())];
     cal_c = new double [64* N_PMT * (ha_id->size())];

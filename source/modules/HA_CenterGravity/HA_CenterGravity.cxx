@@ -16,24 +16,6 @@ ANLStatus HA_CenterGravity::mod_initialize(){
   N_PMT = RawData->Get_Npmt_HA2p();
   N_ADC = RawData->Get_Nch_HA2p();
   
-  if(exist_module("SaveFile")){
-    SaveFile* saveModule = nullptr;
-    get_module_NC("SaveFile", &saveModule);
-    saveModule->cd();
-    saveModule->GetDirectory()->mkdir("HA_CGravity");
-    saveModule->GetDirectory()->cd("HA_CGravity");
-    
-    GrvImg_HA2p = new TH2D* [N_HA * N_PMT];
-    for(int ha=0; ha<N_HA; ha++){
-      for(int pmt=0; pmt<N_PMT; pmt++){
-	char hist[100];
-	sprintf(hist, "GravityMap_HA%02d_PMT%d", (*ha_ID)[ha], pmt+1);
-	GrvImg_HA2p[6*ha+pmt]
-	  = new TH2D(hist, hist, 300, -.3, .3, 300, -.5, .5);
-      }
-    }
-  }
-
   define_evs("HA2p_overflow");
   define_evs("HA2p_data_lack");
   define_evs("HA2p_SingleHit");
@@ -109,9 +91,6 @@ void HA_CenterGravity::CG_Process(int id){
       gr_y[N_PMT*id+pmt]
 	= ((adc[N_ADC*pmt+0] + adc[N_ADC*pmt+3])
 	   - (adc[N_ADC*pmt+1] + adc[N_ADC*pmt+2])) / eng;
-      if(exist_module("SaveFile"))
-	GrvImg_HA2p[N_PMT*id+pmt]
-	  ->Fill(gr_x[N_PMT*id+pmt], gr_y[N_PMT*id+pmt]);
     }
     else if(n_flag > 0 && eng > threshold){
       std::lock_guard<std::mutex> lock(key);

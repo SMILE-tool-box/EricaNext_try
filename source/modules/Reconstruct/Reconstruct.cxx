@@ -50,6 +50,10 @@ ANLStatus Reconstruct::mod_initialize(){
   tree->Branch("skewness_x",&skewness_x,"skewness_x/D");
   tree->Branch("skewness_y",&skewness_y,"skewness_y/D");
   tree->Branch("HA_Pixel",  HA_Pixel,   "HA_Pixel[8]/S");
+  // not in SMILE_tool_box's s2t: gravity and MDF-converted position of the
+  // single-hit pixel, so the pixel maps can be drawn from the tree
+  tree->Branch("HA_Gravity", HA_Gravity, "HA_Gravity[2]/D");
+  tree->Branch("HA_MDF",     HA_MDF,     "HA_MDF[2]/D");
   tree->Branch("Hit_Flag_Num", &Hit_Flag_Num, "Hit_Flag_Num/S");
   tree->Branch("phi_kin",   &phi_deg,   "phi_kin/D");
   tree->Branch("psi_kin",   &psi_deg,   "psi_kin/D");
@@ -110,9 +114,10 @@ ANLStatus Reconstruct::mod_analyze(){
   //   if (outer) { read banks; if (SingleHit) {...} } else { err_flag=1; ... }
   // with the outer condition being Ee && Eg (without the Ve_TRA term), so
   // that is what is reproduced here.
-  // Per03 (sevt 26385, 26628: Ee && Eg valid but no 3D coincidence, can==0)
-  // shows the outer condition also needs Pe_TRA.
-  bool outer = eg_valid && ee_valid && evs("TOT_Pe_TRA");
+  // (The Per03 reference instead leaves such rows stale when there is no 3D
+  // coincidence at all -- sevt 26385, 26628 -- apparently a different
+  // binary; this follows Per02, the reference this port is validated against.)
+  bool outer = eg_valid && ee_valid;
   if(outer){
     Ke    = TPC_FADC->Get_Energy();
     Eg    = HA2p_data->DetEng()->at(0);
@@ -120,6 +125,10 @@ ANLStatus Reconstruct::mod_analyze(){
     Pg[1] = HA2p_data->Det_Y()->at(0);
     Pg[2] = HA2p_data->Det_Z()->at(0);
     for(int k=0; k<8; k++)  HA_Pixel[k] = HA2p_data->Get_HAPixel()[k];
+    for(int k=0; k<2; k++){
+      HA_Gravity[k] = HA2p_data->Get_HAGravity()[k];
+      HA_MDF[k]     = HA2p_data->Get_HAMDF()[k];
+    }
     if(TRA){
       for(int k=0; k<3; k++){
 	Track_Min[k] = TRA->GetTrackMin()[k];
@@ -135,6 +144,13 @@ ANLStatus Reconstruct::mod_analyze(){
 	  Ve_TRA_fit_status[k] = TRA->GetFitStatus()[k];
 	  Ve_TRA_grad_err[k]   = TRA->GetGradErr()[k];
 	}
+      }
+      else{
+	// Per02 reference (sevt 7904, 16877): with no direction fit the
+	// fit status reads 1 while the gradient error keeps its old value.
+	// (The fit-status bank is not in the v2.20 source at all; the
+	// reference binary is newer.)
+	Ve_TRA_fit_status[0] = Ve_TRA_fit_status[1] = 1;
       }
       if(evs("TOT_Skewness")){
 	skewness_x = TRA->GetSkewnessX();
@@ -201,6 +217,7 @@ Reconstruct::Reconstruct(){
   for(int k=0; k<2; k++){ Ve_TRA_fit_status[k] = 0; Ve_TRA_grad_err[k] = 0.; }
   for(int k=0; k<3; k++)  Track_Min[k] = Track_Max[k] = 0.;
   for(int k=0; k<8; k++)  HA_Pixel[k] = 0;
+  for(int k=0; k<2; k++)  HA_Gravity[k] = HA_MDF[k] = 0.;
   Len_TRA = skewness_x = skewness_y = 0.;
   Hit_Flag_Num = 0;
   TOT_Area[0] = TOT_Area[1] = 0.;

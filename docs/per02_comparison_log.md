@@ -267,7 +267,7 @@ setting.macで未設定→デフォルトでOFF(`Strip_data=0`)。該当コー�
 | err_flag, Eg, Ee, Pg, TOT_Area, Pe_TRA, Len_TRA, HA_Pixel, Hit_Flag_Num | 20000 | 0 | 0 |
 | phi_kin / psi_kin / alpha_kin | 19987 / 19985 / 19997 | 13 / 15 / 3 | 0 |
 | skewness_x / y | 19933 / 19947 | 67 / 53 | 0 |
-| Ve_TRA_fit_status | 19995 | - | 5 (7904,16877系の古い値) |
+| Ve_TRA_fit_status | 20000 | - | 0 (項目29) |
 | Track_Min/Max | 19999 | 0 | 1 (16877: 参照のUBのゴミ値) |
 | Ve_TRA | 18148 | 67 | 1785 |
 
@@ -288,3 +288,15 @@ setting.macで未設定→デフォルトでOFF(`Strip_data=0`)。該当コー�
 - `cos_alpha_kin`/`phi_kin`/`psi_kin`(Alpha_kin/angle_scatter/angle_recoil関数)を
   SMLib(Compton_common.cxx)と突き合わせて確認する(現在の比較指標には含まれないが、
   今後ARM/backprojectionの比較をする際に必要になる)。
+
+## 29. 同時計数のないイベントの扱い・Per03 との食い違い (2026-10-01)
+
+- 参照 s2t の `Ve_TRA_fit_status` は、v2.20 のソースには存在しない。参照のバイナリはソースより新しい版。
+- Ee・Eg は有効だが 3 次元同時計数が 0 個のイベント(Track が `[-153.2, -153.2, ...]`)で、
+  Per02 の参照(sevt 7904, 16877)は Ke/Eg/Pg を新しい値で書き、`fit_status` を 1 にする(grad_err は古い値のまま)。
+  → Reconstruct をこれに合わせ、Per02 の 2 万行で `Ve_TRA_fit_status` も全行一致。
+- Per03 の参照(1 日後に作成)は、同じ種類のイベント(sevt 26385, 26628)で Ke/Eg/Pg を前の行のまま残す。
+  Per02 と Per03 を同時に満たす規則はないので、**比較は Per02 の参照だけを基準とする**。
+  影響は `err_flag = 1` の行の引き継ぎ値だけで、`err_flag == 0` の行は Per03 でも全行一致。
+- Per03 の参照は、setting.mac で Per02 の `drift_velocity.dat` を使っている(Per03 の表ではない)。
+  Per02 の表を指定すると Per03 の 5 万行で Pe_TRA/Len_TRA/Track も全行一致する。

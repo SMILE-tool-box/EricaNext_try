@@ -79,16 +79,6 @@ ANLStatus TOT_Skewness::mod_initialize() {
       tree_->Branch("cloud_z", &caq2);
     }
 
-    h_flag_pixel_cut = new TH1F("h_flag_pixel_cut", "Pixel cut flag", 100, 0, 100);
-    h_cut_pixel = new TH2F("h_cut_pixel", "Pixel cut map",
-                            TPC_STRIP_ALL, 0, TPC_STRIP_ALL,
-                            TPC_STRIP_ALL, 0, TPC_STRIP_ALL);
-    h_cut_pixel->SetXTitle("Anode");
-    h_cut_pixel->SetYTitle("Cathode");
-    TPC_Map_xz = new TH2F("TPC_Map_xz", "TPC x-z map",
-                           400, -200., 200., 400, -100., 500.);
-    TPC_Map_yz = new TH2F("TPC_Map_yz", "TPC y-z map",
-                           400, -200., 200., 400, -100., 500.);
   }
 
   define_evs("TOT_Pe_TRA");
@@ -306,10 +296,7 @@ int TOT_Skewness::Komtan_3D_Coincidence(
     for (int j = 0; j < (int)corr_tot_c.size(); j++) {
 
       if (std::fabs(corr_tot_a[i] - corr_tot_c[j]) > w) continue;
-      if (Flag_Pixel_Cut && PixelMask(str_a[i], str_c[j])) {
-        if (h_flag_pixel_cut) h_flag_pixel_cut->Fill(0.5);
-        continue;
-      }
+      if (Flag_Pixel_Cut && PixelMask(str_a[i], str_c[j])) continue;
       acp0->push_back(str_a[i]);
       acp1->push_back(str_c[j]);
       acp2->push_back(corr_tot_a[i]);
@@ -389,14 +376,6 @@ void TOT_Skewness::Calc_Len(
     std::pow(TPC_Pitch[2] * (MAX[2] - MIN[2]), 2)
   );
 
-  if (TPC_Map_xz) {
-    TPC_Map_xz->Fill(Track_Min[0], Track_Min[2]);
-    TPC_Map_xz->Fill(Track_Max[0], Track_Max[2]);
-  }
-  if (TPC_Map_yz) {
-    TPC_Map_yz->Fill(Track_Min[1], Track_Min[2]);
-    TPC_Map_yz->Fill(Track_Max[1], Track_Max[2]);
-  }
   set_evs("TOT_Len_TRA");
 }
 
@@ -575,7 +554,7 @@ int TOT_Skewness::PixelMask(short anode, short cathode) {
   // SMILE_tool_box's PixelMask() hardcodes balloon-flight-specific noisy
   // pixel time windows (day/hour/minute of the flight). Not applicable to
   // ground data; only reached when flag_pixel_cut is explicitly set.
-  if (h_cut_pixel) h_cut_pixel->Fill(anode + 1, cathode + 1);
+  (void)anode;  (void)cathode;
   return 0;
 }
 

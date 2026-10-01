@@ -2,7 +2,6 @@
 
 ANLStatus HA_Calc::mod_define(){
   define_parameter("parameter_dir", &mod_class::PrmDir);
-  define_parameter("Cal_Mode", &mod_class::cal_flag);
   define_parameter("Flag_Modify_PMT_Gain", &mod_class::modify_pmt_gain);
   define_parameter("Modified_Parameter_Data_Dir", &mod_class::ModifiedPrmDir);
   define_parameter("SingleHit_Eth", &mod_class::SingleHit_Eth);
@@ -18,14 +17,6 @@ ANLStatus HA_Calc::mod_initialize(){
   get_module("ReadData", &RawData);
   ha_id = RawData->Get_HA2pID();
   N_PMT = RawData->Get_Npmt_HA2p();
-
-  if(exist_module("SaveFile")){
-    SaveFile* saveModule = nullptr;
-    get_module_NC("SaveFile", &saveModule);
-    saveModule->cd();
-    saveModule->GetDirectory()->mkdir("HA_Calc");
-    saveModule->GetDirectory()->cd("HA_Calc");
-  }
 
   ReadPrm4MDF();
   ReadCalPrm();
@@ -49,7 +40,7 @@ ANLStatus HA_Calc::mod_analyze(){
 
   // calibrated energy / position of every gravity-valid pixel
   // (SMILE_tool_box: HA_Hit_Flag==1 pixels, the only ones HA_Pixel_XYE() runs on)
-  std::vector<double> all_eng, all_x, all_y, all_z;
+  std::vector<double> all_eng, all_x, all_y, all_z, all_grv, all_mdf;
   std::vector<short>  all_pix;   // 4 per hit: HA index, PMT, x_id, y_id
 
   const std::vector<int> *hit_id = HA_Grv->Hit_HA();
@@ -62,6 +53,8 @@ ANLStatus HA_Calc::mod_analyze(){
 			    std::find(ha_id->begin(), ha_id->end(), ha));
     double rx = mdf_x[tmp]->ConvertMDF(pmt, grv);
     double ry = mdf_y[tmp]->ConvertMDF(pmt, grv);
+    all_grv.push_back(grv[0]);  all_grv.push_back(grv[1]);
+    all_mdf.push_back(rx);      all_mdf.push_back(ry);
     // SMILE_tool_box HA_Calc_s2::HA_Pixel_XYE(): clamps unconditionally,
     // with no out-of-range rejection at all.
     if(TMath::Abs(rx) > 0.5 || TMath::Abs(ry) > 0.5)
@@ -73,30 +66,22 @@ ANLStatus HA_Calc::mod_analyze(){
     if(ry >  0.4)  ry = 0.39;
     short x_id = TMath::FloorNint(10 * rx + 4);
     short y_id = TMath::FloorNint(10 * ry + 4);
-    short pixel = x_id*8 + y_id;
     double det_pos[3] = {pos_x[tmp], pos_y[tmp], pos_z[tmp]};
     
-    if(!cal_flag){
-      unsigned cal_idx = 64*(N_PMT*tmp+pmt)+8*x_id+y_id;
-      // SMILE_tool_box HA_Calc_s2::HA_Pixel_XYE():
-      //   eng = cal_a*eng + cal_b; eng *= 662/(cal_a*cal_c + cal_b);
-      eng = cal_a[cal_idx] * eng + cal_b[cal_idx];
-      eng *= 662. / (cal_a[cal_idx] * cal_c[cal_idx] + cal_b[cal_idx]);
+    unsigned cal_idx = 64*(N_PMT*tmp+pmt)+8*x_id+y_id;
+    // SMILE_tool_box HA_Calc_s2::HA_Pixel_XYE():
+    //   eng = cal_a*eng + cal_b; eng *= 662/(cal_a*cal_c + cal_b);
+    eng = cal_a[cal_idx] * eng + cal_b[cal_idx];
+    eng *= 662. / (cal_a[cal_idx] * cal_c[cal_idx] + cal_b[cal_idx]);
 
-      // SMILE_tool_box HA_Calc_s2::HA_Calc_Position():
-      //   ha_x = 54*(pmt%2-0.5) + 6*(x_id-3.5)
-      //   ha_y = 54*(1-pmt/2)   + 6*(y_id-3.5)
-      double ha_x = 54 * ((pmt % 2) - 0.5) + 6 * (x_id - 3.5);
-      double ha_y = 54 * (1 - pmt / 2)     + 6 * (y_id - 3.5);
-      det_pos[0] += dir_xx[tmp] * ha_x + dir_xy[tmp] * ha_y;
-      det_pos[1] += dir_yx[tmp] * ha_x + dir_yy[tmp] * ha_y;
-      det_pos[2] += dir_zx[tmp] * ha_x + dir_zy[tmp] * ha_y;
-    }
-    
-    if(exist_module("SaveFile")){
-      MDF_Image[N_PMT*tmp+pmt]->Fill(rx, ry);
-      Spec_PMT[N_PMT*tmp+pmt]->Fill(eng, pixel);
-    }
+    // SMILE_tool_box HA_Calc_s2::HA_Calc_Position():
+    //   ha_x = 54*(pmt%2-0.5) + 6*(x_id-3.5)
+    //   ha_y = 54*(1-pmt/2)   + 6*(y_id-3.5)
+    double ha_x = 54 * ((pmt % 2) - 0.5) + 6 * (x_id - 3.5);
+    double ha_y = 54 * (1 - pmt / 2)     + 6 * (y_id - 3.5);
+    det_pos[0] += dir_xx[tmp] * ha_x + dir_xy[tmp] * ha_y;
+    det_pos[1] += dir_yx[tmp] * ha_x + dir_yy[tmp] * ha_y;
+    det_pos[2] += dir_zx[tmp] * ha_x + dir_zy[tmp] * ha_y;
 
     all_eng.push_back(eng);
     all_pix.push_back(tmp);  all_pix.push_back(pmt);
@@ -138,6 +123,10 @@ ANLStatus HA_Calc::mod_analyze(){
     det_y.push_back(all_y[chosen]);
     det_z.push_back(all_z[chosen]);
     for(int k=0; k<4; k++)  ha_pixel_[k] = all_pix[4*chosen+k];
+    for(int k=0; k<2; k++){
+      ha_grv_[k] = all_grv[2*chosen+k];
+      ha_mdf_[k] = all_mdf[2*chosen+k];
+    }
     set_evs("HA2p_EgValid");
   }
 
@@ -156,7 +145,6 @@ ANLStatus HA_Calc::mod_finalize(){
 
 HA_Calc::HA_Calc(){
   PrmDir = "./";
-  cal_flag = 1;
   modify_pmt_gain = false;
   ModifiedPrmDir = "./";
   SingleHit_Eth = 50.;

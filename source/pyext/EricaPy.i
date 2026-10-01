@@ -11,6 +11,7 @@
 #include "HA_CenterGravity.h"
 #include "HA_Calc.h"
 #include "Reconstruct.h"
+#include "RawTreeWriter.h"
 
 %}
 
@@ -49,3 +50,4 @@ class TOT_Skewness     : public anlnext::BasicModule {};
 class HA_CenterGravity : public anlnext::BasicModule {};
 class HA_Calc          : public anlnext::BasicModule {};
 class Reconstruct      : public anlnext::BasicModule {};
+class RawTreeWriter    : public anlnext::BasicModule {};

@@ -41,7 +41,6 @@ class HA_CenterGravity : public BasicModule {
   std::vector<int>  hit_ID;
   const std::vector<int>* ha_ID;
   double           *gr_x, *gr_y, *gr_e, *raw_e;
-  TH2D            **GrvImg_HA2p;
   std::mutex        key;
   
   const ReadData* RawData = nullptr;

@@ -58,7 +58,6 @@ def setup(module):
     module.chain(th.HA_Calc)
     module.with_parameters({
         # [HA_Calc_s2]
-        "Cal_Mode": False,                       # Flag_Cal_Mode : 0
         "parameter_dir": PARAM_DIR,
         "Flag_Modify_PMT_Gain": True,             # Flag_Modify_PMT_Gain : 1
         "Modified_Parameter_Data_Dir": PARAM_DIR, # Modified_Parameter_Data_Dir

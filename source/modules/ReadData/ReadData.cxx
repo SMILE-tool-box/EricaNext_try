@@ -9,13 +9,6 @@ ANLStatus ReadData::mod_define(){
 }
 
 ANLStatus ReadData::mod_initialize(){
-  if(exist_module("SaveFile")){
-    SaveFile* saveModule = nullptr;
-    get_module_NC("SaveFile", &saveModule);
-    saveModule->cd();
-    saveModule->GetDirectory()->mkdir("ReadData");
-    saveModule->GetDirectory()->cd("ReadData");
-  }
   ANLStatus flag = ScanFiles();
   define_evs("IDcheck_Loopback");
   

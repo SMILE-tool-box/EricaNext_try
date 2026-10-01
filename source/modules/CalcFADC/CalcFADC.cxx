@@ -17,46 +17,6 @@ ANLStatus CalcFADC::mod_initialize(){
   get_module("ReadData", &RawData);
   Q_anode = new double [4*(RawData->Get_AnodeID()->size())];
   Q_cathode = new double [4*(RawData->Get_CathodeID()->size())];
-  
-  if(exist_module("SaveFile")){
-    SaveFile* saveModule = nullptr;
-    get_module_NC("SaveFile", &saveModule);
-    saveModule->cd();
-    saveModule->GetDirectory()->mkdir("CalcFADC");
-    saveModule->GetDirectory()->cd("CalcFADC");
-
-    unsigned N_a = RawData->Get_AnodeID()->size();
-    unsigned N_c = RawData->Get_CathodeID()->size();
-    BaseAnode = new TH2D("BaselineAnode", "Baseline Anode",
-			 256, -0.5, 255.5, 4*N_a, -0.5, 4*N_a-0.5);
-    BaseAnode->SetXTitle("[ADU]");
-    BaseAnode->SetYTitle("[ch]");
-    ChargeAnode = new TH2D("ChargeAnode", "Charge Anode",
-			   2000, 0, 1e4, 4*N_a, -0.5, 4*N_a-0.5);
-    ChargeAnode->SetXTitle("[ADU]");
-    ChargeAnode->SetYTitle("[ch]");
-
-    BaseCathode = new TH2D("BaselineCathode", "Baseline Cathode",
-			   256, -0.5, 255.5, 4*N_c, -0.5, 4*N_c-0.5);
-    BaseCathode->SetXTitle("[ADU]");
-    BaseCathode->SetYTitle("[ch]");
-
-    ChargeCathode = new TH2D("ChargeCathode", "Charge Cathode",
-			     2000, 0, 1e4, 4*N_c, -0.5, 4*N_c-0.5);
-    ChargeCathode->SetXTitle("[ADU]");
-    ChargeCathode->SetYTitle("[ch]");
-
-    Spec1Hit_A = new TH1D* [16*N_a*N_c];
-    Spec1Hit_C = new TH1D* [16*N_a*N_c];
-    for(unsigned i=0; i<4*N_a; i++)
-      for(unsigned j=0; j<4*N_c; j++){
-	char histname[100];
-	sprintf(histname, "Anode_1Hit_A%02d_C%02d", i, j);
-	Spec1Hit_A[i*(4*N_c)+j] = new TH1D(histname, histname, 2000, 0, 1e4);
-	sprintf(histname, "Cathode_1Hit_A%02d_C%02d", i, j);
-	Spec1Hit_C[i*(4*N_c)+j] = new TH1D(histname, histname, 2000, 0, 1e4);
-      }				     
-  }
 
   define_evs("FADC_NoHit");
   
@@ -73,22 +33,11 @@ ANLStatus CalcFADC::mod_analyze(){
   for(std::thread &t: threads)
     t.join();
 
-  int hit_A=0, hit_C=0, A_ID=-1, C_ID=-1;
+  int A_ID=-1, C_ID=-1;
   for(unsigned i=0; i<4*N_a; i++)
-    if(Q_anode[i] > 0){
-      hit_A++;
-      A_ID = i;
-    }
+    if(Q_anode[i] > 0)  A_ID = i;
   for(unsigned i=0; i<4*N_c; i++)
-    if(Q_cathode[i] > 0){
-      hit_C++;
-      C_ID = i;
-    }
-  if(hit_A==1 && hit_C==1){
-    unsigned area = A_ID*(4*N_c) + C_ID;
-    Spec1Hit_A[area]->Fill(Q_anode[A_ID]);
-    Spec1Hit_C[area]->Fill(Q_anode[C_ID]);    
-  }
+    if(Q_cathode[i] > 0)  C_ID = i;
 
   // SMILE_tool_box CalcFADC::Process() never skips the chain on "no hit"
   // (only on a missing Anode_Data/Cathode_Data packet, which the upstream
@@ -132,17 +81,9 @@ void CalcFADC::IntegWave(bool c_flag, unsigned Nid){
 
       if(c_flag){
 	Q_cathode[4*id+ch] = charge;
-	if(exist_module("SaveFile")){
-	  BaseCathode->Fill(mean, 4*id+ch);
-	  ChargeCathode->Fill(charge, 4*id+ch);
-	}
       }
       else{
 	Q_anode[4*id+ch] = charge;
-	if(exist_module("SaveFile")){
-	  BaseAnode->Fill(mean, 4*id+ch);
-	  ChargeAnode->Fill(charge, 4*id+ch);
-	}
       }
     }
   }

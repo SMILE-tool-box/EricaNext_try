@@ -53,6 +53,7 @@ class Reconstruct : public BasicModule {
   double        Track_Min[3], Track_Max[3];
   double        skewness_x, skewness_y;
   short         HA_Pixel[8];
+  double        HA_Gravity[2], HA_MDF[2];
   short         Hit_Flag_Num;
   double        TOT_Area[2];
 

@@ -32,14 +32,16 @@ class HA_Calc : public BasicModule {
   // "HA_Pixel" [2][4] = {HA index, PMT, pixel X, pixel Y}, -10000 if unset.
   short                       Get_HitFlagNum() const {return hit_flag_num_;};
   const short*                Get_HAPixel()    const {return ha_pixel_;};
+  // gravity (HA_CenterGravity) and MDF-converted position (before the
+  // +-0.39 clamp used for the pixel id) of the single-hit pixel
+  const double*               Get_HAGravity()  const {return ha_grv_;};
+  const double*               Get_HAMDF()      const {return ha_mdf_;};
 
   
  private:
   std::string       PrmDir;
   int               N_HA, N_PMT;
   MDF             **mdf_x, **mdf_y;
-  TH2D            **MDF_Image, **Spec_PMT;
-  bool              cal_flag;
   double           *cal_a, *cal_b, *cal_c;
   // SMILE_tool_box [HA_Calc_s2] Flag_Modify_PMT_Gain / Modified_Parameter_Data_Dir:
   // when set, cal_c (the 662 keV peak position used to re-normalize gain)
@@ -64,6 +66,7 @@ class HA_Calc : public BasicModule {
   std::vector<double>     det_z;
   short                   hit_flag_num_ = 0;
   short                   ha_pixel_[8];
+  double                  ha_grv_[2] = {0, 0}, ha_mdf_[2] = {0, 0};
 
   bool              ReadPrm4MDF();
   bool              ReadCalPrm();

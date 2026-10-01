@@ -7,6 +7,7 @@ set(SUB_DIRS
   HA_CenterGravity
   HA_Calc
   Reconstruct
+  RawTreeWriter
 )
 
 foreach(dir ${SUB_DIRS})

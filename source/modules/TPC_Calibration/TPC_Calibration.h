@@ -55,10 +55,8 @@ class TPC_Calibration : public BasicModule {
   std::vector<int>      CountHitPanel;     // [Na], sum over j of HitPanel[i][j] with HitPanel[i][j] > 100
   std::vector<double>   cal_a, cal_b;
   double                Cal_Modify;
-  TH2D                 *Image_XY;
   TH2C                 *Coinci_A, *Coinci_C;
   std::string           PrmFile;
-  TH1D                 *Spectrum;
 };
 
 #endif

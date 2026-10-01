@@ -3,7 +3,8 @@
 build/
 install/
 *:Zone.Identifier
-notebooks/.ipynb_checkpoints/
-notebooks/*.root
-notebooks/run_chain.py
 run_script/*.root
+tutorials/**/*.root
+tutorials/**/*.run.py
+tutorials/**/.ipynb_checkpoints/
+tutorials/cache/

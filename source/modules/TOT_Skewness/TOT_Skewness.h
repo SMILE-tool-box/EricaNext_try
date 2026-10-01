@@ -81,10 +81,6 @@ class TOT_Skewness : public BasicModule {
 
   // Output objects
   TTree* tree_            = nullptr;
-  TH1F*  h_flag_pixel_cut = nullptr;
-  TH2F*  h_cut_pixel      = nullptr;
-  TH2F*  TPC_Map_xz       = nullptr;
-  TH2F*  TPC_Map_yz       = nullptr;
 
   void   ClearEvent();
   void   TOT_Correction();

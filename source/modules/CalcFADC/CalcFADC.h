@@ -45,9 +45,6 @@ class CalcFADC : public BasicModule {
   // NOT [base_window, Nclk) -- defaults 30/500, not registered in this
   // run's setting.mac so the code defaults apply.
   double            Range_min, Range_max;
-  TH2D             *BaseAnode, *BaseCathode;
-  TH2D             *ChargeAnode, *ChargeCathode;
-  TH1D            **Spec1Hit_A, **Spec1Hit_C;
   
   const ReadData*          RawData = nullptr;
 };

@@ -13,14 +13,6 @@ ANLStatus TPC_Calibration::mod_initialize(){
   get_module("CalcFADC", &Q_TPC);
   get_module("ReadData", &RawData);
   
-  if(exist_module("SaveFile")){
-    SaveFile* saveModule = nullptr;
-    get_module_NC("SaveFile", &saveModule);
-    saveModule->cd();
-    saveModule->GetDirectory()->mkdir("TPC_Calibration");
-    saveModule->GetDirectory()->cd("TPC_Calibration");
-  }
-
   int Nbin = RawData->Get_Track_A()->GetXaxis()->GetNbins();
   max_anode = RawData->Get_Track_A()->GetXaxis()->GetBinUpEdge(Nbin+1);
   Nbin = RawData->Get_Track_C()->GetXaxis()->GetNbins();
@@ -38,13 +30,9 @@ ANLStatus TPC_Calibration::mod_initialize(){
   Coinci_C = new TH2C("Coinci_C", "Coincidence_C",
 		      max_cathode, -0.5, max_cathode-0.5,
 		      max_clock, -0.5, max_clock-0.5);
-  Image_XY = new TH2D("Image_XY", "Image_XY",
-		      max_anode, -0.5, max_anode-0.5,
-		      max_cathode, -0.5, max_cathode-0.5);
-  Image_XY->SetXTitle("Anode");
-  Image_XY->SetYTitle("Cathode");
-  Spectrum = new TH1D("Spectrum", "TPC_Spec", 2000, 0, 400);
-  Spectrum->SetXTitle("Energy [keV]");
+  // per-event work histograms for the coincidence test below, never written
+  Coinci_A->SetDirectory(nullptr);
+  Coinci_C->SetDirectory(nullptr);
   
   AnodeCathodeHit.resize(max_anode*max_cathode);
   HitPanel.resize(Na*Nc);
@@ -104,7 +92,6 @@ ANLStatus TPC_Calibration::mod_analyze(){
 	  if(hit_a & hit_c){
 	    Coinci_A->Fill(ai, clk);
 	    Coinci_C->Fill(cj, clk);
-	    Image_XY->Fill(ai, cj);
 	    AnodeCathodeHit.at(ai*max_cathode+cj) += 1;
 	  }
 	}
@@ -164,8 +151,6 @@ ANLStatus TPC_Calibration::mod_analyze(){
     Energy = (double)0xffffffffu;
   else
     set_evs("TPC_Ee_Valid");
-
-  Spectrum->Fill(Energy);
 
   return AS_OK;
 }

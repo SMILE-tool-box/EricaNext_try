@@ -63,6 +63,11 @@ public:
   // (strip, clock) hit bits in this event, anode / cathode.
   double                   Get_NHitA()      const {return n_hit_a_;};
   double                   Get_NHitC()      const {return n_hit_c_;};
+  // every (strip, clock) hit bit of this event, in decoding order
+  const std::vector<short>& Get_HitStripA() const {return hit_strip_a_;};
+  const std::vector<short>& Get_HitClockA() const {return hit_clk_a_;};
+  const std::vector<short>& Get_HitStripC() const {return hit_strip_c_;};
+  const std::vector<short>& Get_HitClockC() const {return hit_clk_c_;};
   int                GetMinAnode()    const {return min_a;};
   int                GetMaxAnode()    const {return max_a;};
   int                GetMinCathode()  const {return min_c;};
@@ -90,10 +95,9 @@ public:
   unsigned          sevt_id_ = 0;
   unsigned          next_sevt_id_ = 0;
   double            n_hit_a_ = 0, n_hit_c_ = 0;
+  std::vector<short> hit_strip_a_, hit_clk_a_, hit_strip_c_, hit_clk_c_;
   
   TPC_Encoder     **Anode, **Cathode;
-  TH2D             *Image_A, **FADC_Wave_A;
-  TH2D             *Image_C, **FADC_Wave_C;
   TH2C             *Track_A, *Track_C;
   int               min_a, max_a, min_c, max_c;
   int               min_ad, max_ad, min_cd, max_cd;
@@ -102,7 +106,6 @@ public:
   void              Read_Cathode();
 
   CP80256         **SM2p_HA;
-  TH2D            **HA2p_OK, **HA2p_NG;
   void              Scan_CP80256();
   void              Read_CP80256();
 };

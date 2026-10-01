@@ -10,6 +10,56 @@
 `EricaNext_try` は、その中でもまず **SMILE-2+ の生データで再構成が通る状態**を作ることを
 目的に、モジュールを 1 つずつ移植・検証しているディレクトリです。
 
+## 解析チェーン
+
+```mermaid
+flowchart TB
+    raw[("生データ<br/>uTPC_anode/cathode*.raw<br/>HA*.raw")]
+
+    subgraph chain["再構成チェーン(上から順に実行)"]
+        RD["<b>ReadData</b><br/>読み込み・ボード間のイベント同期"]
+        FADC["<b>CalcFADC</b><br/>FADC 波形 → 電荷"]
+        TPCC["<b>TPC_Calibration</b><br/>アノード×カソード同時計数<br/>→ 反跳電子エネルギー Ke"]
+        HACG["<b>HA_CenterGravity</b><br/>PMT 4 ch → 重心"]
+        HAC["<b>HA_Calc</b><br/>MDF 変換・ピクセル同定<br/>→ Eg, 吸収点 Pg"]
+        TOT["<b>TOT_Skewness</b><br/>電子飛跡<br/>→ 散乱点 Pe, 方向 Ve, 飛程 Len"]
+        REC["<b>Reconstruct</b><br/>まとめて 1 イベント 1 行<br/>運動学 φ, ψ, α"]
+        RD --> FADC --> TPCC --> HACG --> HAC --> TOT --> REC
+    end
+
+    RTW["<b>RawTreeWriter</b><br/>(較正・診断用。ReadData の直後につなぐ)"]
+
+    raw --> RD
+    RD -. "TPC ヒット" .-> TPCC
+    RD -. "TPC ヒット" .-> TOT
+    RD --> RTW
+    TPCC -. "Ke" .-> REC
+    HAC -. "Eg, Pg" .-> REC
+
+    REC --> out1[("Reconstruct/single_hit<br/>(TTree)")]
+    RTW --> out2[("RawTreeWriter/raw<br/>同期済み生データ (TTree)")]
+    out1 --> ana["イベント選択・イメージング<br/>tutorials/EventSelection, Backprojection_caldata"]
+    out2 --> cal["ゲインマップ・較正・ドリフト速度<br/>各モジュールの診断図"]
+```
+
+- 実線はチェーンの実行順、点線は主なデータの受け渡しです。
+- 出力ファイルには TTree だけを書きます(図は保存しません)。処理の中身を確かめる図は、
+  `RawTreeWriter/raw` と `Reconstruct/single_hit` から後で描きます(`tutorials/DataIO/modules/`)。
+- どのモジュールも、失敗してもチェーンを止めずにセンチネル値(`0xffffffff`)を入れて続行します。
+  解析では `single_hit` の `err_flag == 0` の行だけを使ってください。
+- 実行時間の大半は生データの読み込みです。データはネットワーク越しではなく手元のディスクに置くと約 10 倍速くなります。
+
+| モジュール | SMILE_tool_box での名前 | 主な出力 |
+| --- | --- | --- |
+| `ReadData` | `RawRead2p` | 同期したイベントの TPC ヒット・FADC 波形・HA の ADC |
+| `CalcFADC` | `CalcFADC` | FADC 24 ch の電荷 |
+| `TPC_Calibration` | `TPC_Calibration` | 反跳電子のエネルギー `Ke` |
+| `HA_CenterGravity` | `HA_Center_Gravity` | PMT ごとの重心と生エネルギー |
+| `HA_Calc` | `HA_Calc_s2` | 散乱ガンマ線のエネルギー `Eg`、吸収点 `Pg`、ピクセル |
+| `TOT_Skewness` | `TOT_Skewness_Analysis` | 散乱点 `Pe`、電子の方向 `Ve`、飛程 `Len` |
+| `Reconstruct` | `Reconstruct` | 再構成ツリー `Reconstruct/single_hit` |
+| `RawTreeWriter` | (なし) | 生データツリー `RawTreeWriter/raw` |
+
 ## 検証状況
 
 各モジュールは SMILE_tool_box_v2.20 と同じ処理になるよう移植し、20190701_Per02 のデータで
@@ -18,14 +68,21 @@
 
 ## チュートリアル
 
-`notebooks/01_smile2p_quickstart.ipynb` に、SMILE-2+ データで一通り解析チェーンを
-動かして結果を可視化するチュートリアルがあります（Fermipy / cosipy のクイックスタート相当）。
+[`tutorials/`](tutorials/README.md) に、cosipy と同じ形式のチュートリアルがあります。
+どのノートブックも「データのダウンロード」から始まり、単独で実行できます。
 
-> **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行い、その中から
-> ROOT のヒストグラムに `Fill` します。これを Jupyter の ipykernel プロセス内でそのまま
-> 実行すると、ipykernel 自身のスレッドと衝突してカーネルごと落ちることがあります
+| フォルダ | 内容 |
+| --- | --- |
+| [`tutorials/DataIO/`](tutorials/DataIO/DataIO_example.ipynb) | Erica によるデータ再構成。`modules/` 以下に各モジュールの解説 |
+| [`tutorials/EventSelection/`](tutorials/EventSelection/EventSelection.ipynb) | イベント選択と、カットごとのエネルギースペクトルの変化 |
+| [`tutorials/Backprojection_caldata/`](tutorials/Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのイベント選択とバックプロジェクション像 |
+| `tutorials/ParallelBeamSim/` | 平行光シミュレーション(準備中) |
+| `tutorials/CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
+
+> **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
+> ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
 > （プレーンな python スクリプトとしての実行では問題ありません）。そのためチュートリアルでは
-> チェーンの構築・実行を別プロセスのスクリプトとして書き出し、`subprocess` で実行しています。
+> チェーンを別プロセスのスクリプトとして書き出し、`subprocess` で実行しています（`tutorials/tutorial_utils.py` の `run_chain`）。
 
 ---
 
@@ -102,7 +159,7 @@ cmake ../source/ \
 
 ## 使い方
 
-チュートリアルは `notebooks/01_smile2p_quickstart.ipynb` を参照してください。
+チュートリアルは [`tutorials/`](tutorials/README.md) を参照してください。
 
 ビルドした Python モジュールは `<CMAKE_INSTALL_PREFIX>/lib/python` にインストールされます。
 Python から import するには、このディレクトリを `PYTHONPATH` に追加してください。
