@@ -10,25 +10,11 @@
 `EricaNext_try` は、その中でもまず **SMILE-2+ の生データで再構成が通る状態**を作ることを
 目的に、モジュールを 1 つずつ移植・検証しているディレクトリです。
 
-## モジュールの由来
+## 検証状況
 
-`SMILEsoft`（SMILE-2+ 時代の実装）と `Erica_git_dev`（`feature-TOT-skewness` ブランチ、
-主に SMILE-3 向けに更新が進んでいる実装）の 2 系統から、モジュールごとに
-「SMILE-2+ の生データを正しく読めるか」を基準に選んで移植しています。
-
-| モジュール | 由来 | 理由 |
-| --- | --- | --- |
-| `SaveFile` | Erica_git_dev | 差分なし |
-| `ReadData` | **SMILEsoft** + Erica_git_dev の Hit vector interface を移植 | Erica_git_dev 版は raw ファイル名が SMILE-3 形式（`tpc_enc_a/c??_*.raw`）で SMILE-2+ 形式（`uTPC_anode/cathode*_*.raw`）を読めないため |
-| `CalcFADC` | **SMILEsoft** | Erica_git_dev 版は物理ボード番号をそのまま配列添字に使っており、12ボード/4パネル固定を前提にしている（SMILEsoft 形式のボード番号と組み合わせると範囲外アクセスの恐れ） |
-| `TPC_Calibration` | Erica_git_dev | ROOT の bin 番号 off-by-one 修正・象限（384 ストリップ単位）一致チェックが入っている。CalcFADC の位置ベース配列とも整合 |
-| `TOT_Skewness` | Erica_git_dev | SMILEsoft 版は未実装（空スタブ）。Erica_git_dev 版が完全実装 |
-| `HA_CenterGravity` / `HA_Calc` / `Reconstruct` | Erica_git_dev | 差分なし |
-
-検証は `SMILEsoft/src/data/Per03_ETCC` の実データ（SMILE-2+ 形式）で行い、
-`ReadData → CalcFADC → TPC_Calibration → TOT_Skewness → HA_CenterGravity → HA_Calc → Reconstruct`
-の全チェーンが動作し、物理的に妥当な再構成結果（飛程・skewness・コンプトン散乱角など）が
-出力されることを確認済みです。
+各モジュールは SMILE_tool_box_v2.20 と同じ処理になるよう移植し、20190701_Per02 のデータで
+参照出力（`haboc_tmp_0.root` の `Reconstruct/s2t`）とビット単位で一致することを確認しています。
+経緯は [`docs/per02_comparison_log.md`](docs/per02_comparison_log.md) を参照してください。
 
 ## チュートリアル
 
