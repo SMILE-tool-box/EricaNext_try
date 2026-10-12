@@ -11,3 +11,8 @@ tutorials_caldata/cache/
 __pycache__/
 tutorials_simulation/**/*.root
 tutorials_simulation/**/.ipynb_checkpoints/
+simulation/build/
+simulation/install/
+simulation/build.log
+simulation/test/*.root
+simulation/test/*.log

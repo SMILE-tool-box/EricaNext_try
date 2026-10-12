@@ -87,7 +87,8 @@ Geant4 と anlgeant4 は、実データの解析とは別の環境に入れて�
 | ANLNext(ベクトル型のパラメータ有効、`ANLNEXT_USE_G4VECTOR=ON`) | `~/opt/anlnext-g4` |
 | ComptonSoft(anlgeant4 を含む、Python 拡張あり) | `~/opt/comptonsoft` |
 
-シミュレーションを使うときは、先に環境を読み込みます。
+作り方は `scripts/sim_env/`(`build_geant4.sh` → `build_anlnext_comptonsoft.sh`)、作業の記録は `docs/simulation_port_log.md` にあります。
+シミュレーションを使うときは、先に環境を読み込みます(`scripts/sim_env/setup_sim.sh` を `~/opt/` に置いたもの)。
 
 ```bash
 source ~/opt/setup_sim.sh

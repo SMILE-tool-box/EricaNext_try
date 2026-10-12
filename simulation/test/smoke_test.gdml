@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Smoke-test geometry (NOT the SMILE-2+ geometry): a TPC gas box and a
+     bottom scintillator slab, with the volume names SMILE_2p uses
+     ("TPC_detectable", names containing "scinti"). Lengths in mm. -->
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
+  <materials>
+    <element name="Ar_e" formula="Ar" Z="18"><atom value="39.948"/></element>
+    <element name="Gd_e" formula="Gd" Z="64"><atom value="157.25"/></element>
+    <element name="Si_e" formula="Si" Z="14"><atom value="28.0855"/></element>
+    <element name="O_e"  formula="O"  Z="8"><atom value="15.999"/></element>
+    <material name="Ar_2atm" state="gas">
+      <D value="0.00332" unit="g/cm3"/>
+      <fraction n="1.0" ref="Ar_e"/>
+    </material>
+    <material name="GSO" state="solid">
+      <D value="6.71" unit="g/cm3"/>
+      <composite n="2" ref="Gd_e"/>
+      <composite n="1" ref="Si_e"/>
+      <composite n="5" ref="O_e"/>
+    </material>
+  </materials>
+  <solids>
+    <box name="world_s" x="4000" y="4000" z="4000" lunit="mm"/>
+    <box name="tpc_s"   x="307.2" y="307.2" z="305" lunit="mm"/>
+    <box name="sci_s"   x="320" y="320" z="13" lunit="mm"/>
+  </solids>
+  <structure>
+    <volume name="TPC_detectable_lv">
+      <materialref ref="Ar_2atm"/><solidref ref="tpc_s"/>
+    </volume>
+    <volume name="scinti_bottom_lv">
+      <materialref ref="GSO"/><solidref ref="sci_s"/>
+    </volume>
+    <volume name="world_lv">
+      <materialref ref="G4_AIR"/><solidref ref="world_s"/>
+      <physvol name="TPC_detectable">
+        <volumeref ref="TPC_detectable_lv"/>
+        <position name="tpc_p" x="0" y="0" z="179.5" unit="mm"/>
+      </physvol>
+      <physvol name="scinti_bottom">
+        <volumeref ref="scinti_bottom_lv"/>
+        <position name="sci_p" x="0" y="0" z="372.4" unit="mm"/>
+      </physvol>
+    </volume>
+  </structure>
+  <setup name="Default" version="1.0"><world ref="world_lv"/></setup>
+</gdml>
