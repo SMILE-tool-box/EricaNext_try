@@ -90,7 +90,7 @@ flowchart TD
 
 | フォルダ | 内容 |
 | --- | --- |
-| `tutorials_simulation/0_Introduction/` | シミュレーションの概要(準備中) |
+| `tutorials_simulation/0_Introduction/` | シミュレーションの全体の流れ、形状、環境(移植中) |
 | `tutorials_simulation/1_PointSourceSim/` | 点線源のシミュレーション(準備中) |
 | `tutorials_simulation/2_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
 | `tutorials_simulation/3_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |

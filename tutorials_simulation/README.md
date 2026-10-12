@@ -5,7 +5,7 @@
 
 | フォルダ | 内容 |
 | --- | --- |
-| [`0_Introduction/`](0_Introduction/) | シミュレーションの概要(準備中) |
+| [`0_Introduction/`](0_Introduction/README.md) | シミュレーションの全体の流れ、EricaNext での作り方、SMILE-2+ の形状(.mqo と GDML)、必要なデータと環境 |
 | [`1_PointSourceSim/`](1_PointSourceSim/) | 点線源のシミュレーション(較正データと同じ配置の Cs-137 など)(準備中) |
 | [`2_ParallelBeamSim/`](2_ParallelBeamSim/) | 平行光シミュレーション(準備中) |
 | [`3_CosmicBGSim/`](3_CosmicBGSim/) | 宇宙線バックグラウンドシミュレーション(準備中) |
