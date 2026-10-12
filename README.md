@@ -183,10 +183,49 @@ python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000          # 先
 python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --compression 505   # 生データツリー
 ```
 
-- 設定ファイル中の `{data_top}` は、データの場所(環境変数 `SMILE2P_DATA`、`~/smile2p_data`、
-  研究室サーバー上の置き場所の順に探す)に置き換わります。
 - `_` で始まるキー(`_comment`, `_setting_mac`, `_note`)は説明用で、モジュールには渡しません。
 - 新しい測定期間は、既存のファイルをコピーしてデータの場所とパラメータを書き換えます。
+
+#### 自分の環境に合わせて変える場所
+
+設定ファイルのパスは `{data_top}/...` と書いてあり、`{data_top}` は実行時に次の順で探したディレクトリに置き換わります。
+
+1. 環境変数 `SMILE2P_DATA`
+2. `~/smile2p_data`(このディレクトリがあれば)
+3. 研究室サーバー上の置き場所(`config/ericanext_config.py` の `SERVER_DIR`)
+
+**データを次の形で置けば、設定ファイルは書き換えずにそのまま使えます。**
+
+```
+<データの置き場>/              ← ~/smile2p_data にする、または export SMILE2P_DATA=<データの置き場>
+├── Per02_ETCC/                ← 生データ(uTPC_*.raw, HA*.raw)と drift_velocity.dat
+├── Per03_ETCC/
+└── param/20190528/            ← 較正ファイル(Calibration20190130.dat, XMDF/YMDF, Cal_HA, HAs.pos など)
+```
+
+```bash
+export SMILE2P_DATA=/path/to/smile2p_data    # ~/smile2p_data に置いた場合は不要
+```
+
+置き方がこれと違う場合だけ、設定ファイル(例: `config/smile2p_20190701_Per02.json`)の次の値を自分のパスに書き換えます。
+`{data_top}` を使わずに絶対パスを書いても構いません。
+
+| モジュール | キー | 中身 | 既定値 |
+| --- | --- | --- | --- |
+| `ReadData` | `data_dir` | 生データのディレクトリ | `{data_top}/Per02_ETCC` |
+| `TPC_Calibration` | `ParameterFile` | TPC の較正ファイル | `{data_top}/param/20190528/Calibration20190130.dat` |
+| `HA_Calc` | `parameter_dir` | HA の MDF・較正値・`HAs.pos` のディレクトリ | `{data_top}/param/20190528` |
+| `HA_Calc` | `Modified_Parameter_Data_Dir` | PMT ゲイン補正(`Mean_Sigma_HA*`)のディレクトリ | `{data_top}/param/20190528` |
+| `TOT_Skewness` | `drift_velocity_file` | ドリフト速度の表 | `{data_top}/Per02_ETCC/drift_velocity.dat` |
+
+- `reference` の 2 つのパス(`setting_mac`, `root`)は、SMILE_tool_box の出力との比較に使うだけで、チェーンの実行には使いません。
+- 研究室サーバー以外(別の研究室など)で使う場合は、`config/ericanext_config.py` の `SERVER`(サーバー名)と
+  `SERVER_DIR`(サーバー上の置き場所)も書き換えると、チュートリアルに表示される rsync のコマンドが正しくなります。
+- どのパスが使われるかは、次で確認できます。
+  ```bash
+  python3 -c "import sys; sys.path.insert(0, 'config'); import ericanext_config as ec, json; \
+              print(ec.data_top()); print(json.dumps(ec.load('smile2p_20190701_Per02')['parameters'], indent=1))"
+  ```
 
 ### Python から直接使う
 
