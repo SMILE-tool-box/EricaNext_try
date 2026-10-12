@@ -52,7 +52,7 @@ flowchart TD
 - 実際の実行順は `ReadData → CalcFADC → TPC_Calibration → HA_CenterGravity → HA_Calc → TOT_Skewness → Reconstruct`
   (SMILE_tool_box の `setting.mac` と同じ)。`RawTreeWriter` は使うときだけ `ReadData` の直後につなぎます。
 - 出力ファイルには TTree だけを書きます(図は保存しません)。処理の中身を確かめる図は、
-  `RawTreeWriter/raw` と `Reconstruct/single_hit` から後で描きます(`tutorials/DataIO/modules/`)。
+  `RawTreeWriter/raw` と `Reconstruct/single_hit` から後で描きます(`tutorials/1_DataIO/modules/`)。
 - どのモジュールも、失敗してもチェーンを止めずにセンチネル値(`0xffffffff`)を入れて続行します。
   解析では `single_hit` の `err_flag == 0` の行だけを使ってください。
 - 実行時間の大半は生データの読み込みです。データはネットワーク越しではなく手元のディスクに置くと約 10 倍速くなります。
@@ -77,15 +77,15 @@ flowchart TD
 ## チュートリアル
 
 [`tutorials/`](tutorials/README.md) に、cosipy と同じ形式のチュートリアルがあります。
-どのノートブックも「データのダウンロード」から始まり、単独で実行できます。
+番号の順に読みます。データの入手方法は 1_DataIO にまとめてあります。
 
 | フォルダ | 内容 |
 | --- | --- |
-| [`tutorials/DataIO/`](tutorials/DataIO/DataIO_example.ipynb) | Erica によるデータ再構成。`modules/` 以下に各モジュールの解説 |
-| [`tutorials/EventSelection/`](tutorials/EventSelection/EventSelection.ipynb) | イベント選択と、カットごとのエネルギースペクトルの変化 |
-| [`tutorials/Backprojection_caldata/`](tutorials/Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのイベント選択とバックプロジェクション像 |
-| `tutorials/ParallelBeamSim/` | 平行光シミュレーション(準備中) |
-| `tutorials/CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
+| [`tutorials/1_DataIO/`](tutorials/1_DataIO/DataIO_example.ipynb) | データのダウンロードと Erica によるデータ再構成。`modules/` 以下に各モジュールの解説(チェーンの順に番号付き) |
+| [`tutorials/2_EventSelection/`](tutorials/2_EventSelection/EventSelection.ipynb) | イベント選択と、カットごとのエネルギースペクトルの変化 |
+| [`tutorials/3_Backprojection_caldata/`](tutorials/3_Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのバックプロジェクション像 |
+| `tutorials/4_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
+| `tutorials/5_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
 
 > **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
 > ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
