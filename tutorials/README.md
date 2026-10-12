@@ -20,8 +20,8 @@
 | └ [`8_RawTreeWriter/`](1_DataIO/modules/8_RawTreeWriter/RawTreeWriter.ipynb) | 同期した生データを TTree に書き出す(較正・診断用。ReadData の直後につなぐ) |
 | [`2_EventSelection/`](2_EventSelection/EventSelection.ipynb) | イベント選択(`SetCrit`)。カットごとのエネルギースペクトルの変化 |
 | [`3_Backprojection_caldata/`](3_Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのバックプロジェクション像 |
-| [`4_ParallelBeamSim/`](4_ParallelBeamSim/) | 平行光シミュレーション(準備中) |
-| [`5_CosmicBGSim/`](5_CosmicBGSim/) | 宇宙線バックグラウンドシミュレーション(準備中) |
+
+シミュレーションのチュートリアルは別のフォルダ [`../tutorial_for_simulation/`](../tutorial_for_simulation/README.md) にあります。
 
 ## 準備
 

@@ -9,3 +9,5 @@ tutorials/**/*.run.py
 tutorials/**/.ipynb_checkpoints/
 tutorials/cache/
 __pycache__/
+tutorial_for_simulation/**/*.root
+tutorial_for_simulation/**/.ipynb_checkpoints/

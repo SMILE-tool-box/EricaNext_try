@@ -85,8 +85,13 @@ flowchart TD
 | [`tutorials/1_DataIO/`](tutorials/1_DataIO/DataIO_example.ipynb) | データのダウンロードと Erica によるデータ再構成。`modules/` 以下に各モジュールの解説(チェーンの順に番号付き) |
 | [`tutorials/2_EventSelection/`](tutorials/2_EventSelection/EventSelection.ipynb) | イベント選択と、カットごとのエネルギースペクトルの変化 |
 | [`tutorials/3_Backprojection_caldata/`](tutorials/3_Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのバックプロジェクション像 |
-| `tutorials/4_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
-| `tutorials/5_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
+
+シミュレーションのチュートリアルは [`tutorial_for_simulation/`](tutorial_for_simulation/README.md) にあります。
+
+| フォルダ | 内容 |
+| --- | --- |
+| `tutorial_for_simulation/1_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
+| `tutorial_for_simulation/2_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
 
 > **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
 > ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
