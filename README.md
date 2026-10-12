@@ -174,7 +174,7 @@ cmake ../source/ \
 モジュールの順番とパラメータ、データ・較正ファイルの場所は、測定期間ごとの設定ファイル
 [`config/*.json`](config/) にまとめています(SMILE_tool_box の参照実行と同じ値)。
 `run_script/run_chain.py`(チュートリアルもこれを使って実行します)がこれを読むので、
-値を変えるときは設定ファイルだけを直します。
+値を変えるときは設定ファイルだけを直します。各スクリプトの使い方は [`run_script/README.md`](run_script/README.md) にあります。
 
 ```bash
 cd run_script
