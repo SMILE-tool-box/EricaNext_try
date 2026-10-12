@@ -8,7 +8,6 @@
 #include "ReadData.h"
 #include "HA_Calc.h"
 #include "TPC_Calibration.h"
-#include "CalcFADC.h"
 #include "TOT_Skewness.h"
 
 using namespace anlnext;
@@ -29,11 +28,6 @@ class Reconstruct : public BasicModule {
   TTree        *tree;
   unsigned      event_id;
   unsigned      sevt_id;
-  int           loopback;  // debug: ReadData's IDcheck_Loopback evs for this event
-  int           n_coinci, max_panel_hit;  // debug: TPC_Calibration internals
-  int           dbg_min_a, dbg_max_a, dbg_min_c, dbg_max_c, dbg_min_d, dbg_max_d;
-  double        dbg_qa[12], dbg_qc[12];
-  int           dbg_hitpanel[144];
   double        Eg, Pg[3], Vg[3];
   double        Ke, Pe[3], Ve[3];
   double        E0, V0[3];
@@ -60,7 +54,6 @@ class Reconstruct : public BasicModule {
   const ReadData*         RawData = nullptr;
   const HA_Calc*          HA2p_data = nullptr;
   const TPC_Calibration*  TPC_FADC = nullptr;
-  const CalcFADC*         Q_TPC = nullptr;
   const TOT_Skewness*     TRA = nullptr;
 };
 

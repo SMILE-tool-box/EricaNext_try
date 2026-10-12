@@ -21,31 +21,9 @@
 // interface to my modules
 
 class SaveFile         : public anlnext::BasicModule {};
-class ReadData         : public anlnext::BasicModule {
- public:
-  int GetMinAnode() const;
-  int GetMaxAnode() const;
-  int GetMinCathode() const;
-  int GetMaxCathode() const;
-  int GetMinClock() const;
-  int GetMaxClock() const;
-  unsigned Get_EventID() const;
-  unsigned Get_SEvtID() const;
-};
-class CalcFADC         : public anlnext::BasicModule {
- public:
-  double Get_Qanode(int ch) const;
-  double Get_Qcathode(int ch) const;
-};
-class TPC_Calibration  : public anlnext::BasicModule {
- public:
-  double Get_Energy() const;
-  int Get_NCoinci() const;
-  int Get_MaxPanelHit() const;
-  int Get_Na() const;
-  int Get_Nc() const;
-  int Get_HitPanel(int i, int j) const;
-};
+class ReadData         : public anlnext::BasicModule {};
+class CalcFADC         : public anlnext::BasicModule {};
+class TPC_Calibration  : public anlnext::BasicModule {};
 class TOT_Skewness     : public anlnext::BasicModule {};
 class HA_CenterGravity : public anlnext::BasicModule {};
 class HA_Calc          : public anlnext::BasicModule {};

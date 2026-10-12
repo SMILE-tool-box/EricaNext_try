@@ -12,7 +12,6 @@ ANLStatus Reconstruct::mod_initialize(){
   get_module("ReadData",         &RawData);
   get_module("HA_Calc",          &HA2p_data);
   get_module("TPC_Calibration",  &TPC_FADC);
-  get_module("CalcFADC",         &Q_TPC);
   if(exist_module("TOT_Skewness"))
     get_module("TOT_Skewness",   &TRA);
 
@@ -28,12 +27,6 @@ ANLStatus Reconstruct::mod_initialize(){
   // cross-run comparison key: matches SMILE_tool_box Reconstruct/s2t's anode_id
   tree->Branch("event_id", &event_id, "event_id/i");
   tree->Branch("sevt_id", &sevt_id, "sevt_id/i");
-  tree->Branch("loopback", &loopback, "loopback/I");
-  tree->Branch("n_coinci", &n_coinci, "n_coinci/I");
-  tree->Branch("max_panel_hit", &max_panel_hit, "max_panel_hit/I");
-  tree->Branch("dbg_qa", dbg_qa, "dbg_qa[12]/D");
-  tree->Branch("dbg_qc", dbg_qc, "dbg_qc[12]/D");
-  tree->Branch("dbg_hitpanel", dbg_hitpanel, "dbg_hitpanel[144]/I");
   tree->Branch("Eg", &Eg, "Eg/D");
   tree->Branch("Ke", &Ke, "Ke/D");
   tree->Branch("E0", &E0, "E0/D");
@@ -77,18 +70,6 @@ ANLStatus Reconstruct::mod_analyze(){
 
   event_id = RawData->Get_EventID();
   sevt_id  = RawData->Get_SEvtID();
-  loopback = evs("IDcheck_Loopback") ? 1 : 0;
-  n_coinci = TPC_FADC->Get_NCoinci();
-  max_panel_hit = TPC_FADC->Get_MaxPanelHit();
-  {
-    int na = TPC_FADC->Get_Na(), nc = TPC_FADC->Get_Nc();
-    for(int i=0;i<12;i++) dbg_qa[i] = (i<na) ? Q_TPC->Get_Qanode(i) : 0.;
-    for(int i=0;i<12;i++) dbg_qc[i] = (i<nc) ? Q_TPC->Get_Qcathode(i) : 0.;
-    for(int i=0;i<144;i++) dbg_hitpanel[i] = 0;
-    for(int i=0;i<na && i<12;i++)
-      for(int j=0;j<nc && j<12;j++)
-	dbg_hitpanel[i*12+j] = TPC_FADC->Get_HitPanel(i,j);
-  }
 
   // SMILE_tool_box Reconstruct::Process():
   //   SingleHit = Ee && Eg && !Eg2 && (Ve_THA || Ve_TRA)

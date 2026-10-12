@@ -72,7 +72,8 @@ class TOT_Skewness : public BasicModule {
 
   // SMILE_tool_box TOTs_ax/TOTs_az/TOTs_cx/TOTs_cz: mm-converted position
   // of *every* raw hit strip (not TOT-corrected, not coincidence-matched).
-  // Used by CalcSkewness() and by the direction (Ve) fit.
+  // Used by CalcSkewness() only; the direction (Ve) fit uses the
+  // TOT-corrected per-strip points (str_a/corr_tot_a, str_c/corr_tot_c).
   std::vector<double> TOTs_ax, TOTs_az, TOTs_cx, TOTs_cz;
 
   // SMILE_tool_box caq0/caq1/caq2: 3D-coincidence-matched hit cloud, mm.

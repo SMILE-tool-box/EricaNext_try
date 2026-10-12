@@ -23,17 +23,6 @@ class TPC_Calibration : public BasicModule {
   ANLStatus mod_finalize() override;
 
   double    Get_Energy()  const {return Energy;};
-  // debug: total strip-level coincidences this event, and the largest
-  // single (anode-panel, cathode-panel) aggregated hit count seen.
-  int       Get_NCoinci()   const {return Coinci_A ? (int)Coinci_A->GetEntries() : 0;};
-  int       Get_MaxPanelHit() const {
-    int m = 0;
-    for(int v : HitPanel) if(v > m) m = v;
-    return m;
-  };
-  int       Get_Na() const {return Na;};
-  int       Get_Nc() const {return Nc;};
-  int       Get_HitPanel(int i, int j) const {return HitPanel.at(i*Nc+j);};
 
 
  private:

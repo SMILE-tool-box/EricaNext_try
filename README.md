@@ -90,7 +90,7 @@ flowchart TD
 > **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
 > ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
 > （プレーンな python スクリプトとしての実行では問題ありません）。そのためチュートリアルでは
-> チェーンを別プロセスのスクリプトとして書き出し、`subprocess` で実行しています（`tutorials/tutorial_utils.py` の `run_chain`）。
+> チェーンを別プロセスのスクリプトとして書き出し、`subprocess` で実行しています（`run_script/run_chain.py` を `subprocess` で呼ぶ）。
 
 ---
 
@@ -168,6 +168,27 @@ cmake ../source/ \
 ## 使い方
 
 チュートリアルは [`tutorials/`](tutorials/README.md) を参照してください。
+
+### 設定ファイルで実行する
+
+モジュールの順番とパラメータ、データ・較正ファイルの場所は、測定期間ごとの設定ファイル
+[`config/*.json`](config/) にまとめています(SMILE_tool_box の参照実行と同じ値)。
+`run_script/run_chain.py`(チュートリアルもこれを使って実行します)がこれを読むので、
+値を変えるときは設定ファイルだけを直します。
+
+```bash
+cd run_script
+python3 run_chain.py smile2p_20190701_Per02 -o per02_out.root              # 全イベントを再構成
+python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000          # 先頭 1 万イベント
+python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --compression 505   # 生データツリー
+```
+
+- 設定ファイル中の `{data_top}` は、データの場所(環境変数 `SMILE2P_DATA`、`~/smile2p_data`、
+  研究室サーバー上の置き場所の順に探す)に置き換わります。
+- `_` で始まるキー(`_comment`, `_setting_mac`, `_note`)は説明用で、モジュールには渡しません。
+- 新しい測定期間は、既存のファイルをコピーしてデータの場所とパラメータを書き換えます。
+
+### Python から直接使う
 
 ビルドした Python モジュールは `<CMAKE_INSTALL_PREFIX>/lib/python` にインストールされます。
 Python から import するには、このディレクトリを `PYTHONPATH` に追加してください。

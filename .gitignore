@@ -8,3 +8,4 @@ tutorials/**/*.root
 tutorials/**/*.run.py
 tutorials/**/.ipynb_checkpoints/
 tutorials/cache/
+__pycache__/
