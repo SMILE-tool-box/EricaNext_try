@@ -7,6 +7,7 @@
 
 | フォルダ | 内容 |
 | --- | --- |
+| [`0_Introduction/`](0_Introduction/Introduction.ipynb) | SMILE-2+ の構成、ETCC で測る量、**座標系の定義**、検出器の配置図 |
 | [`1_DataIO/`](1_DataIO/DataIO_example.ipynb) | Erica によるデータ再構成。データのダウンロードから再構成ツリー `Reconstruct/single_hit` を作るまで |
 | `1_DataIO/modules/` | 各モジュールの解説(番号はチェーンの順) |
 | ├ [`1_ReadData/`](1_DataIO/modules/1_ReadData/ReadData.ipynb) | 生データの読み込みと検出器間のイベント同期 |
