@@ -90,8 +90,10 @@ flowchart TD
 
 | フォルダ | 内容 |
 | --- | --- |
-| `tutorials_simulation/1_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
-| `tutorials_simulation/2_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
+| `tutorials_simulation/0_Introduction/` | シミュレーションの概要(準備中) |
+| `tutorials_simulation/1_PointSourceSim/` | 点線源のシミュレーション(準備中) |
+| `tutorials_simulation/2_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
+| `tutorials_simulation/3_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
 
 > **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
 > ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
