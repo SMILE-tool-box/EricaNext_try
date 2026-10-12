@@ -4,10 +4,10 @@ build/
 install/
 *:Zone.Identifier
 run_script/*.root
-tutorials/**/*.root
-tutorials/**/*.run.py
-tutorials/**/.ipynb_checkpoints/
-tutorials/cache/
+tutorials_caldata/**/*.root
+tutorials_caldata/**/*.run.py
+tutorials_caldata/**/.ipynb_checkpoints/
+tutorials_caldata/cache/
 __pycache__/
-tutorial_for_simulation/**/*.root
-tutorial_for_simulation/**/.ipynb_checkpoints/
+tutorials_simulation/**/*.root
+tutorials_simulation/**/.ipynb_checkpoints/

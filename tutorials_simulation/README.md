@@ -1,7 +1,7 @@
 # EricaNext シミュレーションのチュートリアル
 
-実データのチュートリアルは [`../tutorials/`](../tutorials/README.md) にあります。
-座標系と検出器の構成は [`../tutorials/0_Introduction/`](../tutorials/0_Introduction/Introduction.ipynb) を参照してください。
+実データのチュートリアルは [`../tutorials_caldata/`](../tutorials_caldata/README.md) にあります。
+座標系と検出器の構成は [`../tutorials_caldata/0_Introduction/`](../tutorials_caldata/0_Introduction/Introduction.ipynb) を参照してください。
 
 | フォルダ | 内容 |
 | --- | --- |

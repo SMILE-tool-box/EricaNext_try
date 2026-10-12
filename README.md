@@ -52,7 +52,7 @@ flowchart TD
 - 実際の実行順は `ReadData → CalcFADC → TPC_Calibration → HA_CenterGravity → HA_Calc → TOT_Skewness → Reconstruct`
   (SMILE_tool_box の `setting.mac` と同じ)。`RawTreeWriter` は使うときだけ `ReadData` の直後につなぎます。
 - 出力ファイルには TTree だけを書きます(図は保存しません)。処理の中身を確かめる図は、
-  `RawTreeWriter/raw` と `Reconstruct/single_hit` から後で描きます(`tutorials/1_DataIO/modules/`)。
+  `RawTreeWriter/raw` と `Reconstruct/single_hit` から後で描きます(`tutorials_caldata/1_DataIO/modules/`)。
 - どのモジュールも、失敗してもチェーンを止めずにセンチネル値(`0xffffffff`)を入れて続行します。
   解析では `single_hit` の `err_flag == 0` の行だけを使ってください。
 - 実行時間の大半は生データの読み込みです。データはネットワーク越しではなく手元のディスクに置くと約 10 倍速くなります。
@@ -76,22 +76,22 @@ flowchart TD
 
 ## チュートリアル
 
-[`tutorials/`](tutorials/README.md) に、cosipy と同じ形式のチュートリアルがあります。
+[`tutorials_caldata/`](tutorials_caldata/README.md) に、cosipy と同じ形式のチュートリアルがあります。
 番号の順に読みます。データの入手方法は 1_DataIO にまとめてあります。
 
 | フォルダ | 内容 |
 | --- | --- |
-| [`tutorials/0_Introduction/`](tutorials/0_Introduction/Introduction.ipynb) | SMILE-2+ の構成と座標系の定義(最初に読む) |
-| [`tutorials/1_DataIO/`](tutorials/1_DataIO/DataIO_example.ipynb) | データのダウンロードと Erica によるデータ再構成。`modules/` 以下に各モジュールの解説(チェーンの順に番号付き) |
-| [`tutorials/2_EventSelection/`](tutorials/2_EventSelection/EventSelection.ipynb) | イベント選択と、カットごとのエネルギースペクトルの変化 |
-| [`tutorials/3_Backprojection_caldata/`](tutorials/3_Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのバックプロジェクション像 |
+| [`tutorials_caldata/0_Introduction/`](tutorials_caldata/0_Introduction/Introduction.ipynb) | SMILE-2+ の構成と座標系の定義(最初に読む) |
+| [`tutorials_caldata/1_DataIO/`](tutorials_caldata/1_DataIO/DataIO_example.ipynb) | データのダウンロードと Erica によるデータ再構成。`modules/` 以下に各モジュールの解説(チェーンの順に番号付き) |
+| [`tutorials_caldata/2_EventSelection/`](tutorials_caldata/2_EventSelection/EventSelection.ipynb) | イベント選択と、カットごとのエネルギースペクトルの変化 |
+| [`tutorials_caldata/3_Backprojection/`](tutorials_caldata/3_Backprojection/Backprojection.ipynb) | 較正データのバックプロジェクション像 |
 
-シミュレーションのチュートリアルは [`tutorial_for_simulation/`](tutorial_for_simulation/README.md) にあります。
+シミュレーションのチュートリアルは [`tutorials_simulation/`](tutorials_simulation/README.md) にあります。
 
 | フォルダ | 内容 |
 | --- | --- |
-| `tutorial_for_simulation/1_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
-| `tutorial_for_simulation/2_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
+| `tutorials_simulation/1_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
+| `tutorials_simulation/2_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
 
 > **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
 > ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
@@ -173,7 +173,7 @@ cmake ../source/ \
 
 ## 使い方
 
-チュートリアルは [`tutorials/`](tutorials/README.md) を参照してください。
+チュートリアルは [`tutorials_caldata/`](tutorials_caldata/README.md) を参照してください。
 
 ### 設定ファイルで実行する
 

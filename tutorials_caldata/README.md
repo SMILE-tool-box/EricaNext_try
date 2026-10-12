@@ -19,9 +19,9 @@
 | ├ [`7_Reconstruct/`](1_DataIO/modules/7_Reconstruct/Reconstruct.ipynb) | 1 イベント 1 行の再構成ツリー |
 | └ [`8_RawTreeWriter/`](1_DataIO/modules/8_RawTreeWriter/RawTreeWriter.ipynb) | 同期した生データを TTree に書き出す(較正・診断用。ReadData の直後につなぐ) |
 | [`2_EventSelection/`](2_EventSelection/EventSelection.ipynb) | イベント選択(`SetCrit`)。カットごとのエネルギースペクトルの変化 |
-| [`3_Backprojection_caldata/`](3_Backprojection_caldata/Backprojection_caldata.ipynb) | 較正データのバックプロジェクション像 |
+| [`3_Backprojection/`](3_Backprojection/Backprojection.ipynb) | 較正データのバックプロジェクション像 |
 
-シミュレーションのチュートリアルは別のフォルダ [`../tutorial_for_simulation/`](../tutorial_for_simulation/README.md) にあります。
+シミュレーションのチュートリアルは別のフォルダ [`../tutorials_simulation/`](../tutorials_simulation/README.md) にあります。
 
 ## 準備
 
@@ -35,4 +35,4 @@
 - 結果の読み込み・計算: ROOT の `RDataFrame` と numpy で各ノートブックに直接記述
 
 チェーンの出力(Per02 の先頭 50000 イベントの再構成ツリーと、先頭 5000 イベントの生データツリー)は
-`tutorials/cache/` に置き、各ノートブックで共有します。最初に実行したノートブックがチェーンを流し、以降は再利用します。
+`tutorials_caldata/cache/` に置き、各ノートブックで共有します。最初に実行したノートブックがチェーンを流し、以降は再利用します。

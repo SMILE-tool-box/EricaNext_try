@@ -53,7 +53,7 @@ python3 run_chain.py ../config/my_test.json -o my_test.root -n 10000
 | `Reconstruct/single_hit`: 1 イベント 1 行の再構成ツリー(解析には `err_flag == 0` の行を使う) | `RawTreeWriter/raw`: 1 イベント 1 行の生データ(TPC ヒット、FADC 波形、HA の ADC、時刻) |
 | `TOT_Skewness/tot_skewness`: 電子飛跡の結果だけのツリー | `RawTreeWriter/run_info`: ボード ID の一覧(1 行) |
 
-各ブランチの意味は `tutorials/1_DataIO/` を参照してください。
+各ブランチの意味は `tutorials_caldata/1_DataIO/` を参照してください。
 
 ### パラメータを変えて試すとき
 
