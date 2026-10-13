@@ -138,3 +138,15 @@ python3 compare_with_reference.py per02_out.root --ref /path/to/haboc_tmp_0.root
 python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1
 python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000 -o test.root --set physics.em_msc=urban
 ```
+
+## check_drift_velocity.py
+
+`tutorials_caldata/4_MakeCalibration/DriftVelocity.ipynb` が作った `drift_velocity.dat` を、データに付いているもの
+(SMILE_tool_box / `drift_speed_s2p_v3.C` で作られたもの)と比べます。ノートブックでは比べず、裏での確認に使います。
+
+```bash
+python3 check_drift_velocity.py                      # cache/drift_velocity_Per02.dat と Per02 の設定ファイルが指すファイル
+python3 check_drift_velocity.py made.dat ref.dat --tolerance 1e-3
+```
+
+offset が違うか、速度の相対差の最大が `--tolerance`(既定 1e-3)を超えると終了コード 1。Per02: offset 85 = 85、相対差の最大 2.8e-4。
