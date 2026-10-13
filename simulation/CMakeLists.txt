@@ -21,6 +21,11 @@ add_definitions(-DANLNEXT_USE_HEPVECTOR)
 
 set(SIM_INC_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ggg
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/haboc_g4
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ha_common
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/smile2p_geo
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/gd_capture
   ${ANLNEXT_INSTALL}/include
   ${COMPTONSOFT_INSTALL}/include/anlgeant4
   ${Geant4_INCLUDE_DIRS}
@@ -30,9 +35,9 @@ include_directories(${SIM_INC_DIRS})
 link_directories(${ANLNEXT_INSTALL}/lib ${COMPTONSOFT_INSTALL}/lib)
 list(APPEND CMAKE_INSTALL_RPATH ${ANLNEXT_INSTALL}/lib ${COMPTONSOFT_INSTALL}/lib ${ROOT_LIBRARY_DIR})
 
-file(GLOB SIM_SOURCES src/*.cc)
+file(GLOB SIM_SOURCES src/*.cc vendor/*/*.cxx)
 add_library(EricaSim SHARED ${SIM_SOURCES})
-target_link_libraries(EricaSim ANLNext ANLGeant4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+target_link_libraries(EricaSim ANLNext ANLGeant4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} ROOT::Graf)
 install(TARGETS EricaSim LIBRARY DESTINATION lib)
 
 # Python extension EricaSimPy (same helper as EricaPy / anlgeant4)

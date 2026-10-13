@@ -1,0 +1,66 @@
+{
+  "_comment": [
+    "SMILE-2+ flight, cosmic-ray thermal neutrons (PARMA, depth 10 g/cm2, g10) - same setting as the SMILE_tool_box run",
+    "hikaru3_analysis2/BGsim/thermal_neutron_g10/simulation/d10 (sim.mac, HabocStatus.scl).",
+    "Run: python3 run_script/run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1",
+    "{sim_data} = $SMILE2P_SIM_DATA or ~/smile2p_sim_data (SMILE_tool_box_v2.20/data), {home} = home directory.",
+    "Lengths of anlgeant4 modules are in cm. Lists of 3 numbers are 3-vectors."
+  ],
+  "environment": {
+    "_G4NEUTRONHPDATA": "G4NDL4.7.1 + the Ar-36/38 files of G4NDL4.5 (scripts/sim_env/make_g4ndl_ar36fix.sh); plain G4NDL4.7.1 treats Ar-36 with the Ar-37 data",
+    "G4NEUTRONHPDATA": "{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix"
+  },
+  "detector": {
+    "module": "SMILE2pGeometry",
+    "parameters": {
+      "geometry_dir": "{sim_data}/SMILE_2p_Geo",
+      "geometry_type": "flight",
+      "_ha_position_file": "the SMILE_tool_box simulation default (the reconstruction uses param/20190528/HAs.pos)",
+      "ha_position_file": "{sim_data}/HA_Parameters_20190403_position_only/HAs.pos",
+      "gas_pressure": 2.0
+    }
+  },
+  "physics": {
+    "module": "SMILEPhysicsList",
+    "parameters": {
+      "_em_msc": "gs: Geant4 11 G4EmLivermorePhysics (Goudsmit-Saunderson); urban: e+- multiple scattering of the reference (Geant4 10.4)",
+      "em_msc": "gs",
+      "_gd_physics": "sim.mac GdPhysics 1",
+      "gd_physics": true,
+      "gd155_table": "{sim_data}/Gd_capture/Gd155.dat",
+      "gd157_table": "{sim_data}/Gd_capture/Gd157_org.dat",
+      "cut_value": 0.001,
+      "low_energy_limit": 0.25
+    }
+  },
+  "source": {
+    "module": "ParmaCRPrimaryGen",
+    "parameters": {
+      "particle": "neutron",
+      "flux_file": "/home/onoda/hikaru3_analysis2/BGsim/thermal_neutron_g10/parma_flux/parma_flux_d10_g10_thermal.root",
+      "_plane": "sim.mac ParaSrcSize 3000, ParaSrcDistance 3000 (mm)",
+      "plane_size": 300.0,
+      "plane_distance": 300.0
+    }
+  },
+  "geant4": {
+    "module": "Geant4Body",
+    "parameters": {
+      "random_engine": "MTwistEngine",
+      "random_initialization_mode": 1,
+      "random_seed": 1,
+      "output_random_status": false,
+      "verbose": 0
+    }
+  },
+  "pickup": [
+    {
+      "module": "EdepPickUp",
+      "parameters": {
+        "output": "edep.root",
+        "_ha_off_file": "sim.mac HA_OffFile (SMILE_2p::DepositInPSA drops these PMTs)",
+        "ha_off_file": "{sim_data}/HA_OFF.dat"
+      }
+    }
+  ]
+}

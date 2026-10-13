@@ -6,10 +6,15 @@
 #include <G4ParticleDefinition.hh>
 #include <G4Step.hh>
 #include <G4Track.hh>
+#include <G4VProcess.hh>
 #include <G4VPhysicalVolume.hh>
 #include <G4SystemOfUnits.hh>
 #include <TFile.h>
 #include <TTree.h>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include "HA_common.h"
 
 namespace ericasim {
 
@@ -27,11 +32,29 @@ anlnext::ANLStatus EdepPickUp::mod_define()
   define_parameter("anti_volume", &mod_class::antiVolume_);
   define_parameter("keep_empty_events", &mod_class::keepEmptyEvents_);
   set_parameter_description("also write events without any deposit in the TPC / scintillators");
+  define_parameter("ha_off_file", &mod_class::haOffFile_);
+  set_parameter_description("HA_OFF.dat (haboc HA_OffFile); empty: all HAs on");
   return anlnext::AS_OK;
 }
 
 anlnext::ANLStatus EdepPickUp::mod_initialize()
 {
+  // SMILE_2p constructor: HA_OnOff[HA id][Get_PMT_ID(OFF_PMT-1, ID_TO_NAME)-1] = false,
+  // checked in DepositInPSA with the PMT name of the volume -> key (HA name, PMT name)
+  haOff_.clear();
+  if (!haOffFile_.empty()) {
+    std::ifstream fin(haOffFile_);
+    if (!fin) {
+      std::cerr << "EdepPickUp: cannot open ha_off_file " << haOffFile_ << std::endl;
+      return anlnext::AS_QUIT_ERROR;
+    }
+    int ha, pmt;
+    while (fin >> ha >> pmt) {
+      haOff_.insert({ha, HA_common::Get_PMT_ID(pmt - 1, HA_common::ID_TO_NAME)});
+    }
+    std::cout << "EdepPickUp: " << haOff_.size() << " PMTs switched off (" << haOffFile_ << ")" << std::endl;
+  }
+
   file_ = new TFile(outputFile_.c_str(), "recreate");
   tree_ = new TTree("edep", "energy deposits per event (keV, mm)");
   tree_->Branch("event_id", &eventID_);
@@ -43,6 +66,8 @@ anlnext::ANLStatus EdepPickUp::mod_initialize()
   tree_->Branch("e_scinti", &eScinti_);
   tree_->Branch("e_anti", &eAnti_);
   tree_->Branch("tpc_track", &tpcTrack_);
+  tree_->Branch("tpc_pdg", &tpcPDG_);
+  tree_->Branch("tpc_creator", &tpcCreator_);
   tree_->Branch("tpc_e", &tpcE_);
   tree_->Branch("tpc_x", &tpcX_);
   tree_->Branch("tpc_y", &tpcY_);
@@ -72,7 +97,7 @@ void EdepPickUp::EventActionAtBeginning(const G4Event* event)
 {
   eventID_ = event->GetEventID();
   eTPC_ = eScinti_ = eAnti_ = 0.;
-  tpcTrack_.clear(); tpcE_.clear(); tpcX_.clear(); tpcY_.clear(); tpcZ_.clear();
+  tpcTrack_.clear(); tpcPDG_.clear(); tpcCreator_.clear(); tpcE_.clear(); tpcX_.clear(); tpcY_.clear(); tpcZ_.clear();
   sciVolume_.clear(); sciCopy_.clear(); sciE_.clear(); sciX_.clear(); sciY_.clear(); sciZ_.clear();
 
   primaryName_ = ""; primaryEnergy_ = 0.;
@@ -101,9 +126,20 @@ void EdepPickUp::SteppingAction(const G4Step* step)
   if (name == tpcVolume_) {
     eTPC_ += e;
     tpcTrack_.push_back(track->GetTrackID());
+    tpcPDG_.push_back(track->GetDefinition()->GetPDGEncoding());
+    const G4VProcess* creator = track->GetCreatorProcess();
+    tpcCreator_.push_back(creator ? creator->GetProcessName() : "primary");
     tpcE_.push_back(e); tpcX_.push_back(pos.x()); tpcY_.push_back(pos.y()); tpcZ_.push_back(pos.z());
   }
   else if (name.find(scintiKeyword_) != std::string::npos) {
+    if (!haOff_.empty()) {
+      // volume name scinti_<bottom|side>_<HA name>_<PMT name>_<pixel>
+      std::vector<std::string> f;
+      std::stringstream ss(name);
+      std::string item;
+      while (std::getline(ss, item, '_')) f.push_back(item);
+      if (f.size() >= 5 && haOff_.count({std::stoi(f[2]), std::stoi(f[3])})) return;
+    }
     eScinti_ += e;
     sciVolume_.push_back(name);
     sciCopy_.push_back(step->GetPreStepPoint()->GetTouchable()->GetCopyNumber());

@@ -16,3 +16,8 @@ simulation/install/
 simulation/build.log
 simulation/test/*.root
 simulation/test/*.log
+SMILE_2p.weight
+simulation/test/*.gdml
+!simulation/test/smoke_test.gdml
+!simulation/test/gd_capture_test.gdml
+geo_chk.txt

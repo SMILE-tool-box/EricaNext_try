@@ -44,6 +44,7 @@ void ReadData::Read_Anode(){
   Track_A->Reset("ICES");
   n_hit_a_ = 0;
   hit_strip_a_.clear();  hit_clk_a_.clear();
+  rec_board_a_.clear();  rec_clk_a_.clear();
   min_a = 128 * N_anode.size();  max_a = -1;
   min_ad = 1024;  max_ad = -1;
   
@@ -52,6 +53,8 @@ void ReadData::Read_Anode(){
       if(Anode[i]->TrackSize()){
 	for(unsigned j=0; j<Anode[i]->TrackSize(); j+=5){
 	  int clk = (Anode[i]->TrackData(j)) & 0x7ff;
+	  rec_board_a_.push_back((short)i);
+	  rec_clk_a_.push_back((short)clk);
 	  for(int ch=0; ch<4; ch++){
 	    for(int bit=0; bit<32; bit++){
 	      char str_data;
@@ -80,6 +83,7 @@ void ReadData::Read_Cathode(){
   Track_C->Reset("ICES");
   n_hit_c_ = 0;
   hit_strip_c_.clear();  hit_clk_c_.clear();
+  rec_board_c_.clear();  rec_clk_c_.clear();
   min_c = 128 * N_cathode.size();  max_c = -1;
   min_cd = 1024;  max_cd = -1;
   
@@ -88,6 +92,8 @@ void ReadData::Read_Cathode(){
       if(Cathode[i]->TrackSize()){
 	for(unsigned j=0; j<Cathode[i]->TrackSize(); j+=5){
 	  int clk = (Cathode[i]->TrackData(j)) & 0x7ff;
+	  rec_board_c_.push_back((short)i);
+	  rec_clk_c_.push_back((short)clk);
 	  for(int ch=0; ch<4; ch++){
 	    for(int bit=0; bit<32; bit++){
 	      char str_data;

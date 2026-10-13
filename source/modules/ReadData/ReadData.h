@@ -68,6 +68,13 @@ public:
   const std::vector<short>& Get_HitClockA() const {return hit_clk_a_;};
   const std::vector<short>& Get_HitStripC() const {return hit_strip_c_;};
   const std::vector<short>& Get_HitClockC() const {return hit_clk_c_;};
+  // every hit record of the encoder (one per board and clock, also records whose
+  // strip bits are all zero), as SMILE_tool_box RawRead2p fills Drift_V_Anode/Cathode
+  const std::vector<short>& Get_RecordBoardA() const {return rec_board_a_;};
+  const std::vector<short>& Get_RecordClockA() const {return rec_clk_a_;};
+  const std::vector<short>& Get_RecordBoardC() const {return rec_board_c_;};
+  const std::vector<short>& Get_RecordClockC() const {return rec_clk_c_;};
+  unsigned                 Get_CathodeTime(int i) const {return Cathode[i]->EventTime();};
   int                GetMinAnode()    const {return min_a;};
   int                GetMaxAnode()    const {return max_a;};
   int                GetMinCathode()  const {return min_c;};
@@ -95,6 +102,7 @@ public:
   unsigned          sevt_id_ = 0;
   unsigned          next_sevt_id_ = 0;
   double            n_hit_a_ = 0, n_hit_c_ = 0;
+  std::vector<short> rec_board_a_, rec_clk_a_, rec_board_c_, rec_clk_c_;
   std::vector<short> hit_strip_a_, hit_clk_a_, hit_strip_c_, hit_clk_c_;
   
   TPC_Encoder     **Anode, **Cathode;

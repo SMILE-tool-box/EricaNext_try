@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "SMILE-2+ ground calibration: Cs-137 (661.657 keV) point source at z = -1626 mm above the detector",
+    "(the Per02 setup, tutorials_caldata/0_Introduction). Gammas within 0.25 rad of the -> +z direction.",
+    "Run: python3 run_script/run_sim.py smile2p_ground_cs137 -n 100000 -o cs137.root",
+    "Note: the ground geometry needs etcc_base_no_battery.mqo, which is not in SMILE_tool_box_v2.20/data."
+  ],
+  "environment": {
+    "G4NEUTRONHPDATA": "{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix"
+  },
+  "detector": {
+    "module": "SMILE2pGeometry",
+    "parameters": {
+      "geometry_dir": "{sim_data}/SMILE_2p_Geo",
+      "geometry_type": "ground",
+      "ha_position_file": "{sim_data}/HA_Parameters_20190403_position_only/HAs.pos",
+      "gas_pressure": 2.0
+    }
+  },
+  "physics": {
+    "module": "SMILEPhysicsList",
+    "parameters": {
+      "em_msc": "gs",
+      "gd_physics": false
+    }
+  },
+  "source": {
+    "module": "PointSourcePrimaryGen",
+    "parameters": {
+      "particle": "gamma",
+      "spectral_distribution": "mono",
+      "energy_mean": 661.657,
+      "theta_min": 0.0,
+      "theta_max": 0.25,
+      "position": [0.0, 0.0, -162.6],
+      "direction": [0.0, 0.0, 1.0]
+    }
+  },
+  "geant4": {
+    "module": "Geant4Body",
+    "parameters": {
+      "random_engine": "MTwistEngine",
+      "random_initialization_mode": 1,
+      "random_seed": 1,
+      "output_random_status": false,
+      "verbose": 0
+    }
+  },
+  "pickup": [
+    {"module": "EdepPickUp", "parameters": {"output": "edep.root", "ha_off_file": "{sim_data}/HA_OFF.dat"}}
+  ]
+}

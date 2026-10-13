@@ -50,8 +50,11 @@ class RawTreeWriter : public BasicModule {
   // per-event branches
   unsigned event_id, sevt_id;
   int      loopback;
-  std::vector<unsigned> anode_time;
+  std::vector<unsigned> anode_time, cathode_time;   // per board (100 us counter)
   std::vector<short> hit_a_strip, hit_a_clock, hit_c_strip, hit_c_clock;
+  // every encoder hit record (board, clock), also those whose strip bits are all
+  // zero -- what SMILE_tool_box RawRead2p fills into Drift_V_Anode/Cathode
+  std::vector<short> rec_a_board, rec_a_clock, rec_c_board, rec_c_clock;
   // fadc_ch: 0-11 anode (4*board + ch), 12-23 cathode; fadc_wave holds 512
   // samples per entry of fadc_ch, in the same order. Cathode waveforms are
   // stored inverted (1023 - ADC) exactly as CalcFADC receives them.

@@ -6,8 +6,11 @@
 
 --raw runs ReadData -> RawTreeWriter (event-synchronized raw data tree)
 instead of the reconstruction chain.
+--set Module.param=value overrides a parameter of the config (repeatable), e.g.
+    python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --set RawTreeWriter.save_threshold=10
 """
 import argparse
+import json
 import os
 import sys
 
@@ -29,10 +32,20 @@ def main():
     ap.add_argument("--raw", action="store_true", help="ReadData -> RawTreeWriter only")
     ap.add_argument("--compression", type=int, default=-1,
                     help="ROOT compression setting (505 = zstd, recommended with --raw)")
+    ap.add_argument("--set", action="append", default=[], metavar="MODULE.PARAM=VALUE",
+                    help="override a module parameter (value parsed as JSON when possible), repeatable")
     args = ap.parse_args()
 
     cfg = ec.load(args.config)
     params = cfg["parameters"]
+    for text in args.set:
+        path, value = text.split("=", 1)
+        module, key = path.split(".", 1)
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            pass
+        params.setdefault(module, {})[key] = value
     modules = ["ReadData", "RawTreeWriter"] if args.raw else cfg["chain"]
 
     a = anlnext.AnalysisChain()

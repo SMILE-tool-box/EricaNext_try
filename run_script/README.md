@@ -18,7 +18,7 @@
 
 ```bash
 cd EricaNext_try/run_script
-python3 run_chain.py <設定名> -o <出力ファイル> [-n <イベント数>] [--raw] [--compression <設定>]
+python3 run_chain.py <設定名> -o <出力ファイル> [-n <イベント数>] [--raw] [--compression <設定>] [--set モジュール.パラメータ=値 ...]
 ```
 
 | 引数 | 意味 |
@@ -28,6 +28,7 @@ python3 run_chain.py <設定名> -o <出力ファイル> [-n <イベント数>] 
 | `-n`, `--n-events` | 処理するイベント数。省略すると全イベント(`-1`) |
 | `--raw` | `ReadData → RawTreeWriter` だけを実行し、同期した生データツリー(`RawTreeWriter/raw`)を書く。再構成はしない |
 | `--compression` | ROOT の圧縮設定(100 × アルゴリズム + レベル)。`505` = zstd レベル 5(生データツリーにおすすめ)。省略すると ROOT の既定 |
+| `--set モジュール.パラメータ=値` | 設定ファイルのパラメータをその場で上書き(何回でも)。値は JSON として読むので、小数のパラメータは `10.0` のように書く(`10` だと整数になり、型が合わずに止まる)。例: `--set RawTreeWriter.save_threshold=10.0`、`--set TOT_Skewness.drift_velocity_file=/path/drift_velocity.dat` |
 
 ### 例
 
@@ -40,6 +41,10 @@ python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000
 
 # 生データツリー(較正・診断用)。全イベントで約 5 GB
 python3 run_chain.py smile2p_20190701_Per02 -o per02_raw.root --raw --compression 505
+
+# 較正(tutorials_caldata/4_MakeCalibration)用: 小さい波形は保存せず、HA は保存しない(約 4.6 GB)
+python3 run_chain.py smile2p_20190701_Per02 -o Per02_raw_cal_thr10.root --raw --compression 505 \
+    --set RawTreeWriter.save_threshold=10.0 --set RawTreeWriter.save_ha=false
 
 # 別の期間 / パラメータを変えた設定ファイル
 python3 run_chain.py smile2p_20190701_Per03 -o per03_out.root
@@ -63,6 +68,12 @@ python3 run_chain.py ../config/my_test.json -o my_test.root -n 10000
 cp ../config/smile2p_20190701_Per02.json ../config/my_test.json
 # my_test.json の "parameters" の値(例: "TPC_Calibration": {"Cal_Modify": ...})を編集
 python3 run_chain.py my_test -o my_test.root -n 10000
+```
+
+1 つ 2 つの値を試すだけなら、`--set` で上書きする方が手軽です。
+
+```bash
+python3 run_chain.py smile2p_20190701_Per02 -o my_test.root -n 10000 --set TPC_Calibration.Cal_Modify=1.5
 ```
 
 ### 中でしていること
@@ -117,3 +128,13 @@ python3 compare_with_reference.py per02_out.root --ref /path/to/haboc_tmp_0.root
   「それ以上違う」のうち `err_flag == 0` の行の数を表示します。
 - Per02 の全イベントでの結果と、残る差の理由は `docs/per02_comparison_log.md` の項目 30 にあります。
 - 比較の基準にしているのは Per02 の参照だけです(Per03 の参照は別の版で作られていて、一部の扱いが違うため)。
+
+## run_sim.py
+
+シミュレーション(Geant4 + anlgeant4)を、設定ファイル `config/simulation/*.json`(検出器・物理モデル・線源・乱数・記録)で実行します。
+先に `source ~/opt/setup_sim.sh` が必要です。詳しくは `config/simulation/README.md`。
+
+```bash
+python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1
+python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000 -o test.root --set physics.em_msc=urban
+```

@@ -20,6 +20,9 @@
 | └ [`8_RawTreeWriter/`](1_DataIO/modules/8_RawTreeWriter/RawTreeWriter.ipynb) | 同期した生データを TTree に書き出す(較正・診断用。ReadData の直後につなぐ) |
 | [`2_EventSelection/`](2_EventSelection/EventSelection.ipynb) | イベント選択(`SetCrit`)。カットごとのエネルギースペクトルの変化 |
 | [`3_Backprojection/`](3_Backprojection/Backprojection.ipynb) | 較正データのバックプロジェクション像 |
+| `4_MakeCalibration/` | 較正ファイルを作る(全イベントの生データツリーから) |
+| ├ [`DriftVelocity`](4_MakeCalibration/DriftVelocity.ipynb) | ドリフト速度と offset(`drift_velocity.dat`)。研究室のマクロ `drift_speed_s2p_v3.C` と同じ手順 |
+| └ [`GainMap`](4_MakeCalibration/GainMap.ipynb) | 1 ヒットのスペクトル(ASIC ごと/ボードごと、閾値を選べる)。ゲインマップ(`Calibration*.dat`)は **準備中**(Ba の線源のデータで作る) |
 
 シミュレーションのチュートリアルは別のフォルダ [`../tutorials_simulation/`](../tutorials_simulation/README.md) にあります。
 
@@ -36,3 +39,4 @@
 
 チェーンの出力(Per02 の先頭 50000 イベントの再構成ツリーと、先頭 5000 イベントの生データツリー)は
 `tutorials_caldata/cache/` に置き、各ノートブックで共有します。最初に実行したノートブックがチェーンを流し、以降は再利用します。
+4_MakeCalibration は**全イベント**の生データツリー(`cache/Per02_raw_cal_thr10.root`、約 80 分・約 4.6 GB)を使います。

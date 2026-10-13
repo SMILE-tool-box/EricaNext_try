@@ -39,10 +39,15 @@ ANLStatus RawTreeWriter::mod_initialize(){
   tree_->Branch("sevt_id",  &sevt_id,  "sevt_id/i");
   tree_->Branch("loopback", &loopback, "loopback/I");
   tree_->Branch("anode_time",  &anode_time);
+  tree_->Branch("cathode_time", &cathode_time);
   tree_->Branch("hit_a_strip", &hit_a_strip);
   tree_->Branch("hit_a_clock", &hit_a_clock);
   tree_->Branch("hit_c_strip", &hit_c_strip);
   tree_->Branch("hit_c_clock", &hit_c_clock);
+  tree_->Branch("rec_a_board", &rec_a_board);
+  tree_->Branch("rec_a_clock", &rec_a_clock);
+  tree_->Branch("rec_c_board", &rec_c_board);
+  tree_->Branch("rec_c_clock", &rec_c_clock);
   if(save_fadc){
     tree_->Branch("fadc_ch",   &fadc_ch);
     tree_->Branch("fadc_wave", &fadc_wave);
@@ -61,11 +66,17 @@ ANLStatus RawTreeWriter::mod_analyze(){
 
   anode_time.resize(n_anode);
   for(int i=0; i<n_anode; i++)  anode_time[i] = RawData->Get_AnodeTime(i);
+  cathode_time.resize(n_cathode);
+  for(int i=0; i<n_cathode; i++)  cathode_time[i] = RawData->Get_CathodeTime(i);
 
   hit_a_strip = RawData->Get_HitStripA();
   hit_a_clock = RawData->Get_HitClockA();
   hit_c_strip = RawData->Get_HitStripC();
   hit_c_clock = RawData->Get_HitClockC();
+  rec_a_board = RawData->Get_RecordBoardA();
+  rec_a_clock = RawData->Get_RecordClockA();
+  rec_c_board = RawData->Get_RecordBoardC();
+  rec_c_clock = RawData->Get_RecordClockC();
 
   if(save_fadc){
     const int Nclk = RawData->Get_FADC_clk();

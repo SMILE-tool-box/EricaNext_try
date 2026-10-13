@@ -97,3 +97,6 @@ source ~/opt/setup_sim.sh
 - `GEANT4_BUILD_TLS_MODEL=global-dynamic` は、Python から Geant4 のライブラリを読み込むために必要です
   (既定の設定だと `cannot allocate memory in static TLS block` で止まる)。
 - anlgeant4 は ANLNext をベクトル型のパラメータ有効でビルドしてあることを前提にしているので、別に ANLNext を入れています。
+- 中性子のデータは G4NDL4.7.1 に **Ar-36 / Ar-38 のファイルを G4NDL4.5 から補ったもの**(`scripts/sim_env/make_g4ndl_ar36fix.sh` で作る、
+  `setup_sim.sh` が `G4NEUTRONHPDATA` に設定)。G4NDL4.7.1 のままだと Ar-36 が Ar-37 のデータで扱われ、Ar のガスに偽の (n,α) が入ります
+  (熱中性子で約 6.7 b。`docs/simulation_port_log.md`)。

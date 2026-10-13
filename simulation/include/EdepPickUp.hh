@@ -1,7 +1,9 @@
 #ifndef EricaSim_EdepPickUp_H
 #define EricaSim_EdepPickUp_H 1
 
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 #include "VAppendableUserActionAssembly.hh"
 
@@ -17,6 +19,8 @@ namespace ericasim {
 // like SMILE_2p_Step::UserSteppingAction (edep with the post-step position
 // track->GetPosition()), plus the primary particle, into the TTree "edep".
 // This is the input of the detector-response modules (TPC / HA emulators).
+// ha_off_file (haboc HA_OffFile, data/HA_OFF.dat: lines "HA_name PMT(ID+1)"): scintillator
+// deposits in those PMTs are dropped, as SMILE_2p::DepositInPSA does.
 class EdepPickUp : public anlgeant4::VAppendableUserActionAssembly
 {
   DEFINE_ANL_MODULE(EdepPickUp, 1.0);
@@ -33,6 +37,8 @@ public:
 private:
   std::string outputFile_;
   std::string tpcVolume_, scintiKeyword_, antiVolume_;
+  std::string haOffFile_;
+  std::set<std::pair<int, int>> haOff_;   // (HA name, PMT name) switched off
   bool keepEmptyEvents_;
 
   TFile* file_ = nullptr;
@@ -46,6 +52,8 @@ private:
   double primaryDir_[3] = {0, 0, 0};
   double eTPC_ = 0., eScinti_ = 0., eAnti_ = 0.;   // keV
   std::vector<int>    tpcTrack_;
+  std::vector<int>    tpcPDG_;              // particle of the step
+  std::vector<std::string> tpcCreator_;     // creator process of the track ("primary" for the primary)
   std::vector<double> tpcE_, tpcX_, tpcY_, tpcZ_;  // keV, mm
   std::vector<std::string> sciVolume_;
   std::vector<int>    sciCopy_;
