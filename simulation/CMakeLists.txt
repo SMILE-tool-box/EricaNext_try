@@ -19,8 +19,17 @@ find_package(Boost 1.80.0 CONFIG)
 # ANLNext must be used with the same vector option it was built with
 add_definitions(-DANLNEXT_USE_HEPVECTOR)
 
+# one directory per ANLNext module (as source/modules of the data chain)
+file(GLOB SIM_MODULE_ENTRIES LIST_DIRECTORIES true ${CMAKE_CURRENT_SOURCE_DIR}/modules/*)
+set(SIM_MODULE_DIRS)
+foreach(entry ${SIM_MODULE_ENTRIES})
+  if(IS_DIRECTORY ${entry})
+    list(APPEND SIM_MODULE_DIRS ${entry})
+  endif()
+endforeach()
+
 set(SIM_INC_DIRS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${SIM_MODULE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ggg
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/haboc_g4
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ha_common
@@ -37,7 +46,7 @@ include_directories(${SIM_INC_DIRS})
 link_directories(${ANLNEXT_INSTALL}/lib ${COMPTONSOFT_INSTALL}/lib)
 list(APPEND CMAKE_INSTALL_RPATH ${ANLNEXT_INSTALL}/lib ${COMPTONSOFT_INSTALL}/lib ${ROOT_LIBRARY_DIR})
 
-file(GLOB SIM_SOURCES src/*.cc vendor/*/*.cxx)
+file(GLOB SIM_SOURCES modules/*/*.cc vendor/*/*.cxx)
 add_library(EricaSim SHARED ${SIM_SOURCES})
 target_link_libraries(EricaSim ANLNext ANLGeant4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} ROOT::Graf)
 install(TARGETS EricaSim LIBRARY DESTINATION lib)

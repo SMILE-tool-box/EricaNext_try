@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.join(REPO, "config"))
 import anlnext
 import EricaPy as th
 import ericanext_config as ec
+from anl_run import run_checked
 
 
 def main():
@@ -55,7 +56,8 @@ def main():
         a.chain(getattr(th, m))
         if params.get(m):
             a.with_parameters(params[m])
-    a.run(args.n_events)
+    if not run_checked(a, args.n_events):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

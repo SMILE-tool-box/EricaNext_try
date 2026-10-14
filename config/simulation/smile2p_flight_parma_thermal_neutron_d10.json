@@ -8,7 +8,10 @@
   ],
   "environment": {
     "_G4NEUTRONHPDATA": "G4NDL4.7.1 + the Ar-36/38 files of G4NDL4.5 (scripts/sim_env/make_g4ndl_ar36fix.sh); plain G4NDL4.7.1 treats Ar-36 with the Ar-37 data",
-    "G4NEUTRONHPDATA": "{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix"
+    "G4NEUTRONHPDATA": "{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix",
+    "_doc": {
+      "G4NEUTRONHPDATA": "Geant4 の中性子のデータ(G4NDL)のディレクトリ"
+    }
   },
   "detector": {
     "module": "SMILE2pGeometry",
@@ -17,7 +20,16 @@
       "geometry_type": "flight",
       "_ha_position_file": "the SMILE_tool_box simulation default (the reconstruction uses param/20190528/HAs.pos)",
       "ha_position_file": "{sim_data}/HA_Parameters_20190403_position_only/HAs.pos",
-      "gas_pressure": 2.0
+      "gas_pressure": 2.0,
+      "_units": {
+        "gas_pressure": "atm"
+      },
+      "_doc": {
+        "geometry_dir": "SMILE-2+ の形状のファイル(*.mqo)のディレクトリ",
+        "geometry_type": "flight(気球のゴンドラ付き)/ ground(地上の較正)/ no_vessel",
+        "ha_position_file": "HA の位置と向きのファイル(HAs.pos)",
+        "gas_pressure": "TPC のガスの圧力 [atm]"
+      }
     }
   },
   "physics": {
@@ -30,7 +42,19 @@
       "gd155_table": "{sim_data}/Gd_capture/Gd155.dat",
       "gd157_table": "{sim_data}/Gd_capture/Gd157_org.dat",
       "cut_value": 0.001,
-      "low_energy_limit": 0.25
+      "low_energy_limit": 0.25,
+      "_units": {
+        "cut_value": "mm",
+        "low_energy_limit": "keV"
+      },
+      "_doc": {
+        "em_msc": "e± の多重散乱: gs(Geant4 11 の G4EmLivermorePhysics)/ urban(SMILE_tool_box = Geant4 10.4 と同じ)",
+        "gd_physics": "true: Gd の中性子捕獲のガンマを ANNRI-Gd 系のモデルで作る(sim.mac の GdPhysics 1)",
+        "gd155_table": "Gd の捕獲のモデルの連続成分の表(Gd-155)",
+        "gd157_table": "Gd の捕獲のモデルの連続成分の表(Gd-157)",
+        "cut_value": "γ / e- / e+ の生成のカット(飛程)[mm]",
+        "low_energy_limit": "カットの表のエネルギーの下限 [keV]"
+      }
     }
   },
   "source": {
@@ -38,9 +62,19 @@
     "parameters": {
       "particle": "neutron",
       "flux_file": "/home/onoda/hikaru3_analysis2/BGsim/thermal_neutron_g10/parma_flux/parma_flux_d10_g10_thermal.root",
-      "_plane": "sim.mac ParaSrcSize 3000, ParaSrcDistance 3000 (mm)",
+      "_plane": "plane_size / plane_distance are in cm (anlgeant4 length unit): 300 cm = 3000 mm = sim.mac ParaSrcSize 3000, ParaSrcDistance 3000 (mm)",
       "plane_size": 300.0,
-      "plane_distance": 300.0
+      "plane_distance": 300.0,
+      "_units": {
+        "plane_size": "cm",
+        "plane_distance": "cm"
+      },
+      "_doc": {
+        "particle": "一次粒子(neutron, proton, e-, e+, gamma)",
+        "flux_file": "PARMA のフラックスの ROOT ファイル(sim.mac の CR_FluxFile)",
+        "plane_size": "粒子を出す正方形の面の一辺 [cm](sim.mac の ParaSrcSize [mm])",
+        "plane_distance": "その面の原点からの距離 [cm](sim.mac の ParaSrcDistance [mm])"
+      }
     }
   },
   "geant4": {
@@ -50,7 +84,14 @@
       "random_initialization_mode": 1,
       "random_seed": 1,
       "output_random_status": false,
-      "verbose": 0
+      "verbose": 0,
+      "_doc": {
+        "random_engine": "乱数の生成器(MTwistEngine など)",
+        "random_initialization_mode": "乱数の初期化(0: 自動、1: random_seed の整数、2: 状態ファイル)",
+        "random_seed": "乱数の種(random_initialization_mode = 1 のとき)",
+        "output_random_status": "true: 乱数の状態をファイルに書く",
+        "verbose": "Geant4 の表示の詳しさ"
+      }
     }
   },
   "pickup": [
@@ -59,7 +100,11 @@
       "parameters": {
         "output": "edep.root",
         "_ha_off_file": "sim.mac HA_OffFile (SMILE_2p::DepositInPSA drops these PMTs)",
-        "ha_off_file": "{sim_data}/HA_OFF.dat"
+        "ha_off_file": "{sim_data}/HA_OFF.dat",
+        "_doc": {
+          "output": "エネルギー損失の TTree(edep)を書く ROOT ファイル",
+          "ha_off_file": "使わない PMT の一覧(HA_OFF.dat)。そこのシンチのエネルギー損失は捨てる"
+        }
       }
     }
   ]

@@ -78,7 +78,7 @@ def main():
     ap.add_argument("config", help=f"config name or .json path ({', '.join(ec.available_sim())})")
     ap.add_argument("-n", "--n-events", type=int, required=True, help="number of primary events")
     ap.add_argument("-o", "--output", help="output ROOT file of the first pickup module")
-    ap.add_argument("--seed", type=int, help="random seed (geant4.random_seed; the response modules use seed + 1, + 2, ...)")
+    ap.add_argument("--seed", type=int, help="random seed (geant4.random_seed; the response modules use seed*100 + 1, + 2, ...)")
     ap.add_argument("--raw-dir", help="directory of the raw files (RawWriter2p.output_dir); the sim tree goes to <dir>/sim_truth.root")
     ap.add_argument("--set", action="append", default=[], metavar="SECTION.KEY=VALUE",
                     help="override a parameter, e.g. physics.em_msc=urban (repeatable)")
@@ -117,7 +117,9 @@ def main():
         add_module(chain, entry)
     for entry in cfg.get("response", []):
         add_module(chain, entry)
-    chain.run(args.n_events)
+    from anl_run import run_checked
+    if not run_checked(chain, args.n_events):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

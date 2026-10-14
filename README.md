@@ -9,6 +9,60 @@
 
 `EricaNext_try` は、その中でもまず **SMILE-2+ の生データで再構成し**、ETCC解析についてのチュートリアル的な役割です。
 
+## 使い方(まずここ)
+
+実行するスクリプトは 2 つです。どちらも **最初の引数に設定ファイル** を渡します。
+設定ファイルに、つなぐモジュールとそのパラメータ、データの場所をすべて書いておき、スクリプトはそれを読んでチェーンを組んで実行します。
+
+| スクリプト | すること | 設定ファイル |
+| --- | --- | --- |
+| [`run_script/run_chain.py`](run_script/run_chain.py) | 生データ(実データ・シミュレーションの raw)の **再構成** | [`config/<名前>.json`](config/) |
+| [`run_script/run_sim.py`](run_script/run_sim.py) | Geant4 の **シミュレーション**(検出器の応答をつけると実データと同じ形式の raw も書く) | [`config/simulation/<名前>.json`](config/simulation/README.md) |
+
+```bash
+cd run_script
+
+# 再構成: 設定ファイル smile2p_20190701_Per02(= config/smile2p_20190701_Per02.json)
+python3 run_chain.py smile2p_20190701_Per02 -o per02_out.root               # 全イベント
+python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000           # 先頭 1 万イベント
+python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --compression 505   # 同期した生データのツリー
+
+# シミュレーション(先に source ~/opt/setup_sim.sh)
+python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o edep.root --seed 1
+python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10_raw -n 1000000 -o edep.root --seed 1 --raw-dir rawdata
+
+# シミュレーションの raw を再構成する(上の rawdata を読む。新しいシェルで。setup_sim.sh は不要)
+python3 run_chain.py smile2p_sim_d10_recon -o sim_recon.root --set ReadData.data_dir=rawdata
+```
+
+- 設定ファイルは名前(拡張子なし)で書くと `config/`(`run_sim.py` は `config/simulation/`)から探します。`.json` のパスを直接書いても構いません。
+  省くとエラーになり、使える名前の一覧が出ます。
+- 値を変えるときは、設定ファイルをコピーして書き換えるか、`--set` でその場だけ上書きします
+  (`run_chain.py` は `--set モジュール.パラメータ=値`、`run_sim.py` は `--set 節.キー=値`)。
+- 設定ファイルの各モジュールには、全パラメータの説明(`_doc`)と単位(`_units`)を書いています。
+- 失敗すると終了コード 1 で終わります(データを最後まで読んだときと `-n` で止めたときは 0)。
+
+| `run_chain.py` の引数 | 意味 |
+| --- | --- |
+| `<設定>` | 設定ファイル(必須) |
+| `-o` | 出力の ROOT ファイル(必須) |
+| `-n` | 処理するイベント数。省略すると全イベント |
+| `--raw` | 再構成せず、`ReadData → RawTreeWriter` で同期した生データのツリーだけを書く |
+| `--compression` | ROOT の圧縮設定(`505` = zstd レベル 5) |
+| `--set モジュール.パラメータ=値` | パラメータの上書き(何回でも)。小数は `10.0` のように書く |
+
+| `run_sim.py` の引数 | 意味 |
+| --- | --- |
+| `<設定>` | 設定ファイル(必須) |
+| `-n` | 一次粒子の数(必須) |
+| `-o` | エネルギー損失のツリー(`edep`)を書く ROOT ファイル。省略すると設定ファイルの値 |
+| `--seed` | 乱数の種。省略すると設定ファイルの値 |
+| `--raw-dir` | raw ファイルの出力先(`response` の節がある設定だけ) |
+| `--set 節.キー=値` | パラメータの上書き(何回でも)。例: `physics.em_msc=urban`、`response.TPCEmulator.Vth_Anode=6000` |
+
+詳しい説明(出力の中身、例、中でしていること)は [`run_script/README.md`](run_script/README.md)、
+設定ファイルの書き方は下の「[設定ファイルで実行する](#設定ファイルで実行する)」と [`config/simulation/README.md`](config/simulation/README.md) にあります。
+
 ## 解析チェーン
 
 ```mermaid
@@ -191,7 +245,7 @@ python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000          # 先
 python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --compression 505   # 生データツリー
 ```
 
-- `_` で始まるキー(`_comment`, `_setting_mac`, `_note`)は説明用で、モジュールには渡しません。
+- `_` で始まるキー(`_comment`, `_setting_mac`, `_note`, `_doc`, `_units`)は説明用で、モジュールには渡しません。各モジュールの `_doc` に全パラメータの説明、`_units` に単位のあるパラメータの単位を書いています。パラメータを足すときは、この 2 つにも書いてください。
 - 新しい測定期間は、既存のファイルをコピーしてデータの場所とパラメータを書き換えます。
 
 #### 自分の環境に合わせて変える場所

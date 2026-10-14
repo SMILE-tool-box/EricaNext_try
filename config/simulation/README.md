@@ -40,7 +40,8 @@ python3 run_script/run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000 -
 | `response` | `SimTrigger`、`TPCEmulator`、`HAEmulator`、`RawWriter2p`(リスト、無くてもよい) | DAQ モード、TPC・HA の応答のパラメータ(SMILE_tool_box と同じ名前)、raw の出力先 |
 
 - 文字列の `{sim_data}` は `$SMILE2P_SIM_DATA`、無ければ `~/smile2p_sim_data`(SMILE_tool_box_v2.20/data の写し)、`{home}` はホーム、`{data_top}` は実データの置き場(`config/*.json` と同じ)に置き換わります。
-- `_` で始まるキーはコメント。
+- `_` で始まるキーはコメント。各モジュールの `_doc` に全パラメータの説明、`_units` に単位のあるパラメータの単位を書いています
+  (例: `"plane_size": "cm"`)。パラメータを足すときは、この 2 つにも書いてください。
 - anlgeant4 のモジュールの長さの単位は cm。3 つの数のリストは 3 次元ベクトル(`position` など)。
 
 ## 物理モデルの選択肢

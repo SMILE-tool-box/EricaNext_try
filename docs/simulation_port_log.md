@@ -218,7 +218,7 @@ ETCC の中 52.4398、下部の回路 138.403、anti 2.14172、ゴンドラ 53.3
   出発点は方向に垂直な一辺 `ParaSrcSize` の正方形の上で一様、原点から `ParaSrcDistance` だけ上流。
 - リファレンスは毎イベント `gRandom->SetSeed(CLHEP の種)` していた(種は毎イベント時刻から作るので実害なし)。
   EricaNext では同じアルゴリズム(累積和で bin を選び、bin の中で一様)を Geant4 の乱数で行う → anlgeant4 の種で再現できる。
-- `simulation/src/ParmaCRPrimaryGen.cc`(`anlgeant4::BasicPrimaryGen`)。パラメータ `particle`, `flux_file`, `flux_histogram`(空なら粒子から)、
+- `simulation/modules/ParmaCRPrimaryGen/ParmaCRPrimaryGen.cc`(`anlgeant4::BasicPrimaryGen`)。パラメータ `particle`, `flux_file`, `flux_histogram`(空なら粒子から)、
   `plane_size`, `plane_distance`(既定はリファレンスのコードの既定 3 m / 1.5 m。リファレンスの run は sim.mac で 3000 / 3000 mm)。
   run の終わりに等価な観測時間 N / (面積 × 全フラックス) を表示する(d10 熱中性子: 全フラックス 0.2048 /cm²/s、1M 個で 54.3 s)。
 - `EdepPickUp` に `ha_off_file`: リファレンスの `SMILE_2p::DepositInPSA` と同じく、`HA_OFF.dat` の PMT(8 個)のシンチのエネルギー損失を捨てる
@@ -426,6 +426,16 @@ SMILE_tool_box_v2.20 の 3 モジュール(ローカルの写し `~/SMILE_tool_b
   (どちらの物理設定が正しいかではなく、エミュレータの結果が Geant4 の版・設定で 1 割変わる)。
 - 2026-10-14 決定(小野田): **このまま(既定は gs)でよい。** 細かいステップで 1 割多いのも物理的におかしくはない。
   リファレンスと合わせたいときは `--set physics.em_msc=urban`。
+
+## 2026-10-15 simulation のモジュールの置き場所、終了コード
+
+- 小野田の希望で、`simulation/src`, `simulation/include` を `simulation/modules/<モジュール名>/`(データ解析の `source/modules` と同じ形)に変更
+  (`git mv`)。CMakeLists.txt は `modules/*` のフォルダを集める。並べ替えの前後で同じ種の結果がバイト単位で一致
+  (Geant4 の部分 187 イベント、真の値 55 イベント、HA の raw 18 ファイル)。
+- `anlnext.AnalysisChain.run()` は初期化に失敗しても何も返さないので、`run_script/anl_run.py` の `run_checked()`(同じ手順で状態を確かめる)
+  を `run_chain.py` と `run_sim.py` で使い、失敗したら終了コード 1。データの終わり(ReadData の AS_QUIT_ALL)と -n で止めた場合は 0 のまま。
+- 2026-10-14〜15、`hikaru3_analysis2` のマウントが NFS から SMB に変わった(小野田)。切り替えの間、ファイルのアクセス権が `----------` に見えたり、
+  読んでいたプロセス(Ba-133 の Per03, 04, 06)が終了処理なしで止まったりした。流し直し中。
 
 ## 次にやること
 
