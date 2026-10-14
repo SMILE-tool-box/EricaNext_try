@@ -21,6 +21,13 @@ ANLStatus ReadData::ScanFiles(){
   return AS_OK;
 }
 
+// A board that was not read out leaves a first file smaller than one event (0 bytes, or a
+// fragment such as 20 bytes in the TPC-only runs of 2017). One TPC encoder event is at least
+// 16 (header) + 4096 (FADC) + 4 (version) + 4 (footer) = 4120 bytes.
+bool ReadData::FileEmpty(std::string filename){
+  return std::filesystem::file_size(DataDir + "/" + filename) < 4120;
+}
+
 bool ReadData::FileExists(std::string filename){
   std::string fname = DataDir + "/" + filename;
   bool flag = std::filesystem::exists(fname);

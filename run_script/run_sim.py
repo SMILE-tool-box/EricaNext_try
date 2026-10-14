@@ -4,10 +4,12 @@ config/simulation/*.json. Run after `source ~/opt/setup_sim.sh`.
 
     python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1
     python3 run_sim.py my_setting.json -n 1000 -o test.root --set physics.em_msc=urban
+    python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10_raw -n 100000 -o edep.root --raw-dir rawdata
 
-The config has the sections environment, detector, physics, source, geant4 and pickup
-(see config/simulation/README.md). The chain is
+The config has the sections environment, detector, physics, source, geant4, pickup and
+(optional) response (see config/simulation/README.md). The chain is
     detector -> physics -> source -> geant4 (Geant4Body) -> StandardUserActionAssembly -> pickup...
+    -> response... (SimTrigger -> TPCEmulator -> HAEmulator -> RawWriter2p: raw files like measured data)
 Modules are looked up in EricaSimPy, then anlgeant4.
 """
 import argparse
@@ -59,8 +61,14 @@ def apply_override(cfg, text):
         pass
     if section == "environment":
         cfg.setdefault("environment", {})[key] = value
-    elif section == "pickup":
-        cfg["pickup"][0]["parameters"][key] = value
+    elif section in ("pickup", "response"):
+        # pickup.key / response.Module.key
+        if section == "response":
+            module, key = key.split(".", 1)
+            entry = next(e for e in cfg["response"] if e["module"] == module)
+        else:
+            entry = cfg["pickup"][0]
+        entry.setdefault("parameters", {})[key] = value
     else:
         cfg[section]["parameters"][key] = value
 
@@ -70,7 +78,8 @@ def main():
     ap.add_argument("config", help=f"config name or .json path ({', '.join(ec.available_sim())})")
     ap.add_argument("-n", "--n-events", type=int, required=True, help="number of primary events")
     ap.add_argument("-o", "--output", help="output ROOT file of the first pickup module")
-    ap.add_argument("--seed", type=int, help="random seed (geant4.random_seed)")
+    ap.add_argument("--seed", type=int, help="random seed (geant4.random_seed; the response modules use seed + 1, + 2, ...)")
+    ap.add_argument("--raw-dir", help="directory of the raw files (RawWriter2p.output_dir); the sim tree goes to <dir>/sim_truth.root")
     ap.add_argument("--set", action="append", default=[], metavar="SECTION.KEY=VALUE",
                     help="override a parameter, e.g. physics.em_msc=urban (repeatable)")
     args = ap.parse_args()
@@ -80,6 +89,16 @@ def main():
         cfg["pickup"][0]["parameters"]["output"] = args.output
     if args.seed is not None:
         cfg["geant4"]["parameters"]["random_seed"] = args.seed
+        for i, entry in enumerate(cfg.get("response", [])):
+            if "random_seed" in entry.get("parameters", {}):
+                entry["parameters"]["random_seed"] = args.seed * 100 + i + 1
+    if args.raw_dir:
+        for entry in cfg.get("response", []):
+            if entry["module"] == "RawWriter2p":
+                entry["parameters"]["output_dir"] = args.raw_dir
+                entry["parameters"]["truth_file"] = os.path.join(args.raw_dir, "sim_truth.root")
+            if entry["module"] == "HAEmulator" and "cal_output_dir" in entry.get("parameters", {}):
+                entry["parameters"]["cal_output_dir"] = args.raw_dir
     for text in args.set:
         apply_override(cfg, text)
 
@@ -95,6 +114,8 @@ def main():
         add_module(chain, cfg[section])
     chain.chain(anlgeant4.StandardUserActionAssembly)
     for entry in cfg.get("pickup", []):
+        add_module(chain, entry)
+    for entry in cfg.get("response", []):
         add_module(chain, entry)
     chain.run(args.n_events)
 

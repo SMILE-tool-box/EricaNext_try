@@ -4,12 +4,13 @@ void ReadData::Scan_Encoder(){
   for(int i=0; i<32; i++){
     char f_anode[100];
     sprintf(f_anode, "uTPC_anode%d_00000.raw", i+1);
-    if(FileExists(f_anode))
+    // boards that were not read out leave a first file smaller than one event (TPC-only runs of 2017)
+    if(FileExists(f_anode) && !FileEmpty(f_anode))
       N_anode.push_back(i+1);
 
     char f_cathode[100];
     sprintf(f_cathode, "uTPC_cathode%d_00000.raw", i+1);
-    if(FileExists(f_cathode))
+    if(FileExists(f_cathode) && !FileEmpty(f_cathode))
       N_cathode.push_back(i+1);
   }
   if(N_anode.size()){

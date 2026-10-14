@@ -6,6 +6,8 @@ ANLStatus HA_Calc::mod_define(){
   define_parameter("Modified_Parameter_Data_Dir", &mod_class::ModifiedPrmDir);
   define_parameter("SingleHit_Eth", &mod_class::SingleHit_Eth);
   define_parameter("SingleHit_ADCth", &mod_class::SingleHit_ADCth);
+  define_parameter("Emu_Mode", &mod_class::emu_mode);
+  set_parameter_description("1 for simulated data (EmuWrite2p / RawWriter2p): PMT / pixel IDs of the emulator are renumbered before the position (SMILE_tool_box HA_Emu_ID_Modification)");
 
   return AS_OK;
 }
@@ -73,6 +75,18 @@ ANLStatus HA_Calc::mod_analyze(){
     //   eng = cal_a*eng + cal_b; eng *= 662/(cal_a*cal_c + cal_b);
     eng = cal_a[cal_idx] * eng + cal_b[cal_idx];
     eng *= 662. / (cal_a[cal_idx] * cal_c[cal_idx] + cal_b[cal_idx]);
+
+    // SMILE_tool_box HA_Calc_s2::HA_Emu_ID_Modification() (Emu_Mode): the emulator numbers
+    // PMTs / pixels differently; renumber before the position (energy above uses the original IDs)
+    if(emu_mode){
+      switch(pmt){
+      case 0: pmt = 1; x_id = 7 - x_id; y_id = 7 - y_id; break;
+      case 1: pmt = 5; x_id = 7 - x_id; y_id = 7 - y_id; break;
+      case 3:          x_id = 7 - x_id; y_id = 7 - y_id; break;
+      case 5: pmt = 0; break;
+      default: break;
+      }
+    }
 
     // SMILE_tool_box HA_Calc_s2::HA_Calc_Position():
     //   ha_x = 54*(pmt%2-0.5) + 6*(x_id-3.5)
@@ -146,6 +160,7 @@ ANLStatus HA_Calc::mod_finalize(){
 HA_Calc::HA_Calc(){
   PrmDir = "./";
   modify_pmt_gain = false;
+  emu_mode = false;
   ModifiedPrmDir = "./";
   SingleHit_Eth = 50.;
   SingleHit_ADCth = 1000.;

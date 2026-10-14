@@ -31,6 +31,7 @@ class TPC_Encoder {
  private:
   unsigned         evt_time = 0;
   std::string      FileName(bool);
+  bool             OpenNext();
   unsigned         ReadData(int&);
   unsigned         ReadData(int&, unsigned);
   

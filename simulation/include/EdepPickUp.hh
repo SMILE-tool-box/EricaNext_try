@@ -34,6 +34,25 @@ public:
   void EventActionAtEnd(const G4Event* event) override;
   void SteppingAction(const G4Step* step) override;
 
+  // the current event, for the detector-response modules after this one in the chain
+  int EventID() const { return eventID_; }
+  const std::string& PrimaryName() const { return primaryName_; }
+  double PrimaryEnergy() const { return primaryEnergy_; }   // keV
+  const double* PrimaryPos() const { return primaryPos_; }   // mm
+  const double* PrimaryDir() const { return primaryDir_; }
+  double TPCEnergy() const { return eTPC_; }        // keV
+  double ScintiEnergy() const { return eScinti_; }
+  double AntiEnergy() const { return eAnti_; }
+  const std::vector<double>& TPCStepE() const { return tpcE_; }   // keV
+  const std::vector<double>& TPCStepX() const { return tpcX_; }   // mm (world)
+  const std::vector<double>& TPCStepY() const { return tpcY_; }
+  const std::vector<double>& TPCStepZ() const { return tpcZ_; }
+  const std::vector<std::string>& ScintiStepVolume() const { return sciVolume_; }
+  const std::vector<double>& ScintiStepE() const { return sciE_; }
+  const std::vector<double>& ScintiStepX() const { return sciX_; }
+  const std::vector<double>& ScintiStepY() const { return sciY_; }
+  const std::vector<double>& ScintiStepZ() const { return sciZ_; }
+
 private:
   std::string outputFile_;
   std::string tpcVolume_, scintiKeyword_, antiVolume_;

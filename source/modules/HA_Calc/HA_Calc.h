@@ -48,6 +48,7 @@ class HA_Calc : public BasicModule {
   // is overridden per-pixel from Mean_Sigma_HA%02d_137Cs_662keV.dat instead
   // of being derived from cal_a/cal_b alone.
   bool              modify_pmt_gain;
+  bool              emu_mode;          // simulated data: renumber PMT / pixel IDs
   std::string       ModifiedPrmDir;
   // SMILE_tool_box [HA_Calc_s2] SingleHit_Eth(keV) / SingleHit_ADCth(ADC):
   // a single-hit event is only valid if the hit pixel's calibrated energy

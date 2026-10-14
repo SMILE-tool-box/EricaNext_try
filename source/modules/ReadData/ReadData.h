@@ -95,6 +95,7 @@ public:
 
   ANLStatus         ScanFiles();
   bool              FileExists(std::string);
+  bool      FileEmpty(std::string);
   
   std::vector<int>  N_anode, N_cathode, N_HA2p;
   std::vector<unsigned> Event_ID;

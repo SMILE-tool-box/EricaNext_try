@@ -26,6 +26,8 @@ set(SIM_INC_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/ha_common
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/smile2p_geo
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/gd_capture
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/tpc_emu
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/emu_write
   ${ANLNEXT_INSTALL}/include
   ${COMPTONSOFT_INSTALL}/include/anlgeant4
   ${Geant4_INCLUDE_DIRS}

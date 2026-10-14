@@ -1,4 +1,7 @@
 #include "TPC_Encoder.h"
+#include <chrono>
+#include <filesystem>
+#include <thread>
 
 int TPC_Encoder::GetEventID(unsigned& eid){
   int flag = 0;
@@ -109,10 +112,7 @@ unsigned TPC_Encoder::ReadData(int& flag){
     raw.read(&data[i], 1);
     if(raw.eof()){
       raw.close();
-      raw.open(FileName(1));
-      if(raw)
-	std::cout << FileName() << std::endl;
-      else{
+      if(!OpenNext()){
 	flag = 2;
 	break;
       }
@@ -133,10 +133,7 @@ unsigned TPC_Encoder::ReadData(int& flag, unsigned initial){
   raw.read(&data, 1);
   if(raw.eof()){
     raw.close();
-    raw.open(FileName(1));
-    if(raw)
-      std::cout << FileName() << std::endl;
-    else
+    if(!OpenNext())
       flag = 2;
     raw.read(&data, 1);
   }
@@ -145,6 +142,26 @@ unsigned TPC_Encoder::ReadData(int& flag, unsigned initial){
   return val;
 }
 
+
+// Open the next file of this board. A missing file is the end of the data. A file that exists
+// but cannot be opened (network mounts under heavy parallel reading) is retried for up to 30 s
+// instead of ending the run early.
+bool TPC_Encoder::OpenNext(){
+  const std::string name = FileName(1);
+  if(!std::filesystem::exists(name))
+    return false;
+  for(int retry=0; retry<30; retry++){
+    raw.clear();
+    raw.open(name);
+    if(raw){
+      std::cout << name << std::endl;
+      return true;
+    }
+    std::cerr << "TPC_Encoder: cannot open " << name << ", retrying (" << retry+1 << ")" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+  return false;
+}
 
 TPC_Encoder::TPC_Encoder(std::string d_name, bool flag, int b_id, bool reverse){
   dir = d_name;

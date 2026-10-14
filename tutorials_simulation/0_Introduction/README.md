@@ -28,7 +28,7 @@ SMILE-3 も同じ仕組みで扱えるように、Geant4 の部分は ANLNext �
 | 形状 | GDML(下の 3 節) |
 | 物理リスト | haboc の `SMILE_PhysicsList`(Livermore の電磁相互作用、FTFP_BERT_HP、Gd の中性子捕獲など)を `VANLPhysicsList` として移植 |
 | 宇宙線(PARMA のフラックス) | `SMILE_2p_PA_CR` を `VANLPrimaryGen` として移植 |
-| エネルギー損失の記録、検出器の応答、raw ファイルの書き出し | `SMILE_2p_Step` / `TPC_emulator` / `Emu_HA` / `EmuWrite2p` を ANLNext のモジュールとして移植 |
+| エネルギー損失の記録、検出器の応答、raw ファイルの書き出し | `EdepPickUp`(SMILE_2p_Step)、`SimTrigger`(DAQ_Mode)、`TPCEmulator`(TPC_emulator)、`HAEmulator`(Emu_HA)、`RawWriter2p`(EmuWrite2p) |
 
 リファレンス(SMILE_tool_box)とはビット単位では一致させず(乱数の使い方が変わるため)、
 エネルギー損失のスペクトルや検出効率、実データ(Per02 の Cs-137)との比較で確かめます。

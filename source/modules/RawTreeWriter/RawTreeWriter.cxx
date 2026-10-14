@@ -4,6 +4,7 @@ ANLStatus RawTreeWriter::mod_define(){
   define_parameter("save_threshold", &mod_class::save_threshold);
   define_parameter("base_window",    &mod_class::base_window);
   define_parameter("save_fadc",      &mod_class::save_fadc);
+  define_parameter("save_hits",      &mod_class::save_hits);
   define_parameter("save_ha",        &mod_class::save_ha);
   return AS_OK;
 }
@@ -40,14 +41,16 @@ ANLStatus RawTreeWriter::mod_initialize(){
   tree_->Branch("loopback", &loopback, "loopback/I");
   tree_->Branch("anode_time",  &anode_time);
   tree_->Branch("cathode_time", &cathode_time);
-  tree_->Branch("hit_a_strip", &hit_a_strip);
-  tree_->Branch("hit_a_clock", &hit_a_clock);
-  tree_->Branch("hit_c_strip", &hit_c_strip);
-  tree_->Branch("hit_c_clock", &hit_c_clock);
-  tree_->Branch("rec_a_board", &rec_a_board);
-  tree_->Branch("rec_a_clock", &rec_a_clock);
-  tree_->Branch("rec_c_board", &rec_c_board);
-  tree_->Branch("rec_c_clock", &rec_c_clock);
+  if(save_hits){
+    tree_->Branch("hit_a_strip", &hit_a_strip);
+    tree_->Branch("hit_a_clock", &hit_a_clock);
+    tree_->Branch("hit_c_strip", &hit_c_strip);
+    tree_->Branch("hit_c_clock", &hit_c_clock);
+    tree_->Branch("rec_a_board", &rec_a_board);
+    tree_->Branch("rec_a_clock", &rec_a_clock);
+    tree_->Branch("rec_c_board", &rec_c_board);
+    tree_->Branch("rec_c_clock", &rec_c_clock);
+  }
   if(save_fadc){
     tree_->Branch("fadc_ch",   &fadc_ch);
     tree_->Branch("fadc_wave", &fadc_wave);
@@ -126,6 +129,7 @@ RawTreeWriter::RawTreeWriter(){
   save_threshold = 0.;   // off: on Per02 >99% of read-out channels exceed 15 ADC anyway
   base_window    = 30;
   save_fadc      = true;
+  save_hits      = true;
   save_ha        = true;
 }
 

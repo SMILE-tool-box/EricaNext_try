@@ -40,6 +40,7 @@ class RawTreeWriter : public BasicModule {
   double save_threshold;   // [ADC] above the baseline
   int    base_window;      // samples used for the baseline in the save decision
   bool   save_fadc;
+  bool   save_hits;   // hit_*_strip/clock and rec_*_board/clock
   bool   save_ha;
 
   int n_anode = 0, n_cathode = 0, n_ha = 0;

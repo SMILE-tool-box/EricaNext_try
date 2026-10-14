@@ -6,10 +6,11 @@
     cfg["parameters"]["CalcFADC"]    # {"base_window": 30.0, "threshold": 20.0}
 
 Keys starting with "_" are comments and are dropped by load(); "{data_top}"
-in strings is replaced by data_top().
+in strings is replaced by data_top() and "{tpc_caldata}" by tpc_caldata().
 
 Simulation configurations are in config/simulation/*.json (load_sim()); there
-"{sim_data}" is replaced by sim_data() and "{home}" by the home directory.
+"{sim_data}" is replaced by sim_data(), "{home}" by the home directory and
+"{data_top}" by data_top().
 """
 import json
 import os
@@ -21,6 +22,8 @@ CONFIG_DIR = Path(__file__).resolve().parent
 # place when running on the server).
 SERVER = "ramune"
 SERVER_DIR = "/home/onoda/hikaru3_analysis2/sm2+_cal_rawdata"
+# TPC-only calibration runs (Ba-133, 2017-12-19/20) for the gain map
+SERVER_TPC_CALDATA = "/home/onoda/hikaru3_analysis2/TPC_caldata"
 
 
 def data_top():
@@ -36,6 +39,20 @@ def data_top():
     if local.is_dir() or not Path(SERVER_DIR).is_dir():
         return local
     return Path(SERVER_DIR)
+
+
+def tpc_caldata():
+    """Directory that holds the TPC-only calibration runs (<date>/<PerXX>_TPC/).
+
+    Order: $SMILE2P_TPC_CALDATA, ~/smile2p_data/TPC_caldata, the server directory.
+    """
+    env = os.environ.get("SMILE2P_TPC_CALDATA")
+    if env:
+        return Path(env).expanduser()
+    local = Path("~/smile2p_data/TPC_caldata").expanduser()
+    if local.is_dir() or not Path(SERVER_TPC_CALDATA).is_dir():
+        return local
+    return Path(SERVER_TPC_CALDATA)
 
 
 def available():
@@ -73,7 +90,8 @@ def load(name, data_top_dir=None):
         path = CONFIG_DIR / f"{name}.json"
     with open(path) as fp:
         raw = json.load(fp)
-    return _resolve(raw, {"{data_top}": Path(data_top_dir) if data_top_dir else data_top()})
+    return _resolve(raw, {"{data_top}": Path(data_top_dir) if data_top_dir else data_top(),
+                          "{tpc_caldata}": tpc_caldata(), "{sim_data}": sim_data()})
 
 
 def load_sim(name):
@@ -83,4 +101,4 @@ def load_sim(name):
         path = SIM_CONFIG_DIR / f"{name}.json"
     with open(path) as fp:
         raw = json.load(fp)
-    return _resolve(raw, {"{sim_data}": sim_data(), "{home}": Path.home()})
+    return _resolve(raw, {"{sim_data}": sim_data(), "{home}": Path.home(), "{data_top}": data_top()})

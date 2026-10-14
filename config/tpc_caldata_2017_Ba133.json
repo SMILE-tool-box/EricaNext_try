@@ -1,0 +1,50 @@
+{
+  "_comment": [
+    "TPC-only calibration runs with a Ba-133 source (2017-12-19/20), for the TPC gain map",
+    "(tutorials_caldata/4_MakeCalibration/GainMap.ipynb; method of Calamity_v5.0).",
+    "{tpc_caldata} is replaced by the directory of the runs: $SMILE2P_TPC_CALDATA, else ~/smile2p_data/TPC_caldata,",
+    "else the server directory. Place the runs as <tpc_caldata>/20171219/Per01_TPC etc.",
+    "Each run is processed separately with --set ReadData.data_dir={tpc_caldata}/<run>."
+  ],
+  "source": "Ba133",
+  "peaks_keV": [
+    30.85,
+    8.04
+  ],
+  "runs": [
+    "20171219/Per01_TPC",
+    "20171219/Per08_TPC",
+    "20171219/Per09_TPC",
+    "20171219/Per10_TPC",
+    "20171219/Per12_TPC",
+    "20171220/Per01_TPC",
+    "20171220/Per02_TPC",
+    "20171220/Per03_TPC",
+    "20171220/Per04_TPC",
+    "20171220/Per05_TPC",
+    "20171220/Per06_TPC",
+    "20171220/Per07_TPC"
+  ],
+  "chain": [
+    "ReadData",
+    "CalcFADC"
+  ],
+  "parameters": {
+    "ReadData": {
+      "data_dir": "{tpc_caldata}/20171219/Per01_TPC",
+      "reverse_TPC": true,
+      "TPC_Only": true
+    },
+    "CalcFADC": {
+      "base_window": 30.0,
+      "threshold": 20.0
+    },
+    "RawTreeWriter": {
+      "_save_threshold": "waveforms whose maximum is <= baseline + 10 ADU are not stored: any charge threshold >= 10 can be used afterwards",
+      "save_threshold": 10.0,
+      "save_ha": false,
+      "save_hits": false
+    }
+  },
+  "_runs": "each run irradiates one anode board x one cathode board (empty 0-byte files for the others), except 20171219/Per01 and 20171220/Per06 (all boards)"
+}

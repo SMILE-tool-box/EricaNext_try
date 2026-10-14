@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "Reconstruction of EricaNext simulated raw data (RawWriter2p, config/simulation/smile2p_flight_parma_thermal_neutron_d10_raw.json)",
+    "with the settings of the SMILE_tool_box reconstruction of the reference simulation",
+    "(hikaru3_analysis2/BGsim/thermal_neutron_g10/reconstruct_skew/d10/v1/HabocStatus.scl).",
+    "Set the raw directory with --set ReadData.data_dir=<raw dir>.",
+    "{sim_data}/emulator_param: MDF for the emulator, Cal_HA*.dat of HAEmulator, HAs.pos, drift velocity of the simulation (README.txt there)."
+  ],
+  "chain": [
+    "ReadData",
+    "CalcFADC",
+    "TPC_Calibration",
+    "HA_CenterGravity",
+    "HA_Calc",
+    "TOT_Skewness",
+    "Reconstruct"
+  ],
+  "parameters": {
+    "ReadData": {
+      "data_dir": "rawdata",
+      "reverse_TPC": true
+    },
+    "CalcFADC": {
+      "base_window": 30.0,
+      "threshold": 20.0
+    },
+    "TPC_Calibration": {
+      "_HabocStatus": "TPC_Cal_Data_Dir parameters/20190124/Calibration20190130.dat, Cal_Modify 1.27512",
+      "ParameterFile": "{data_top}/param/20190528/Calibration20190130.dat",
+      "Cal_Modify": 1.27512
+    },
+    "HA_CenterGravity": {
+      "_HabocStatus": "ADC_Threshold 33",
+      "threshold": 33,
+      "overflow": 4000
+    },
+    "HA_Calc": {
+      "_HabocStatus": "Emu_Mode 1, Parameter_Data_Dir parameters/emulator, Flag_Modify_PMT_Gain 0, SingleHit_Eth 50, SingleHit_ADCth 1000",
+      "parameter_dir": "{sim_data}/emulator_param",
+      "Flag_Modify_PMT_Gain": false,
+      "Modified_Parameter_Data_Dir": "{sim_data}/emulator_param",
+      "Emu_Mode": true,
+      "SingleHit_Eth": 50.0,
+      "SingleHit_ADCth": 1000.0
+    },
+    "TOT_Skewness": {
+      "_note": "the drift-velocity file of the reference reconstruction (hikaru3_analysis2/par_for_sim_reconstruct): offset 85, 0.38 mm/clock; drift_velocity_sim.dat is the one derived from the simulated hit clocks (offset 93, 0.3770)",
+      "drift_velocity_file": "{sim_data}/emulator_param/drift_velocity.dat"
+    },
+    "Reconstruct": {}
+  }
+}

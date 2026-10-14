@@ -339,6 +339,94 @@ x・y の面は z が 9〜309 mm)を numpy で計算: **1.631 ± 0.013 %**(リ�
 - A と B の率の差 3.9 ± 1.7 %(2.3σ)は中性子のデータ(JEFF-3.3 / ENDF/B-VII.1)の差の可能性。どちらもリファレンスから 1.5σ 程度。
 - → 既定は **Ar-36 を補った G4NDL4.7.1 + Geant4 11 の GS** のままにする。
 
+## 2026-10-14 検出器の応答と raw ファイル(TPC_emulator, Emu_HA, EmuWrite2p)の移植
+
+SMILE_tool_box_v2.20 の 3 モジュール(ローカルの写し `~/SMILE_tool_box_v2.20/Erica/`)を、EricaSim の ANLNext モジュールとして移植。
+チェーンは `... → EdepPickUp → SimTrigger → TPCEmulator → HAEmulator → RawWriter2p`(config の新しい節 `response`、`run_sim.py --raw-dir`)。
+
+| SMILE_tool_box | EricaSim | 中身 |
+| --- | --- | --- |
+| SMILE_2p の DAQ_Mode / Collect_Number | `SimTrigger` | 1 TPC、2 シンチ、3 TPC && シンチ、4 + anti なし、5 TPC だけ、6 シンチだけ。満たさないイベントは AS_SKIP。規定数に達したら次のイベントの頭で終了 |
+| TPC_emulator(ver 0.41) | `TPCEmulator` | 電離(cluster.txt の分布 / Poisson × Fano)、拡散、FiducialModify の解析的な関数での位置と時刻、GEM の隙間、GEM(幾何分布)× µ-PIC(Polya、ゲインマップから)、岩城の応答のテンプレート、ストリップ × クロックの地図 → ボードごとのヒットの記録と 4 × 512 の FADC |
+| Emu_HA | `HAEmulator` | 分解能(底面 11.5 %、側面 10.5 %)、周りへのもれ、電荷分割(charge.div)、PMT の一様性(PMT_Map、無ければ 1)、3.1 ch/keV、ペデスタル 0.8、閾値 33 / 4095 → 0x2000。`Cal_HA*.dat` も書く |
+| EmuWrite2p | `RawWriter2p` | `TPC_FileManager`, `HA_FileManager` をそのまま使って raw を書く。真の値の `sim` ツリー(`sim_truth.root`) |
+
+- 入力: SMILE_tool_box はバンク(`TPC_Hit_E/X/Y/Z` = Geant4 の各ステップのエネルギー損失 [keV] と位置 [mm]、`ScintiHit_*` = ピクセルごとの合計)。
+  EricaNext は `EdepPickUp` から同じもの(シンチはピクセルの体積の名前ごとに、最初のエネルギー損失の順で合計)。
+- そのまま残したリファレンスの癖: FADC の積分が 33 ストリップ分(隣の ASIC の 1 本を含む)、FiducialModify::RealToDetector_3D でカソードの時刻にもアノードの座標を使う、
+  `fidmod.Init()` を呼ばないので fiducial_modify.root は使われず解析的な関数、ゲインマップの読み込みの eof の扱い、
+  TPC の時刻は実行の経過時間(壁時計)× 100、`r_gem` は引くが使わない(乱数の順番を保つため残した)。
+- 違い: 乱数は random_seed から作る TRandom3(リファレンスは既定の種 4357 の TRandom3 と gRandom)→ 統計的に同じでビット単位では一致しない。診断用のヒストグラムは作らない。
+- vendor: `tpc_emu/`(CalcCluster: 種の指定と SetDirectory(nullptr) のみ追加、FiducialModify: そのまま)、`emu_write/`(TPC_FileManager, HA_FileManager: そのまま)。
+- リファレンスの run のパラメータ(HabocStatus.scl)で `config/simulation/smile2p_flight_parma_thermal_neutron_d10_raw.json` を作成。
+  ゲインマップは参照の `parameters/20190124/Calibration20190130.dat` と同じ名前の `param/20190528/Calibration20190130.dat`。
+- 確認: 20 万イベントで 55 イベントを書き出し、EricaNext の ReadData でそのまま読めた。リファレンスの raw(d10/v1、10000 イベント)も ReadData で読めた。
+  ReadData → RawTreeWriter の生データツリーで比べると(`scratchpad/compare_simraw.py`)、55 イベントでも
+  ヒットの記録の数、ストリップのヒットの数、FADC の電荷、HA の ADC の数と合計の KS p = 0.16〜0.85。
+- 8 × 1M(seed 1〜8)で 1927 イベント(リファレンスの d10/v1 は 10000):
+
+  | 量(1 イベントあたり) | 中央値 EricaNext / リファレンス | KS p |
+  | --- | --- | --- |
+  | アノードのヒットの記録 | 82 / 95 | 0.079 |
+  | カソードのヒットの記録 | 80 / 94 | 0.089 |
+  | アノードのストリップのヒット | 613 / 655 | 0.16 |
+  | カソードのストリップのヒット | 605 / 636 | 0.056 |
+  | アノードの FADC の電荷(閾値 20) [pC] | 1777 / 1734 | 0.21 |
+  | カソードの FADC の電荷 [pC] | 1731 / 1735 | 0.18 |
+  | HA の有効な ADC の数 | 8 / 8 | 0.76 |
+  | HA の ADC の合計 | 4355 / 4398 | 0.95 |
+
+  ヒットのクロックの分布の 0.5 % / 99.5 % 点: 103 / 905(リファレンス 103 / 903)。分布の形もすべて重なる → 検出器の応答と raw の書き出しはリファレンスと同等。
+
+## 2026-10-14 シミュレーションの raw の再構成(EricaNext のチェーン)
+
+- リファレンスの再構成の設定(`BGsim/thermal_neutron_g10/reconstruct_skew/d10/v1/HabocStatus.scl`): Cal_Modify 1.27512、
+  HA_Center_Gravity の閾値 33、HA_Calc_s2 `Emu_Mode 1`・`Parameter_Data_Dir parameters/emulator`・`Flag_Modify_PMT_Gain 0`、
+  シミュレーション用の別の drift_velocity.dat(`/home/nis_home/ikeda_sim/simulation4/CR_BG_data4/drift_velocity.dat`、手元に無い)。
+- `Emu_Mode`(SMILE_tool_box `HA_Emu_ID_Modification`): エミュレータの PMT / ピクセルの番号を位置の計算の前に付け直す
+  (PMT 0 → 1 で x, y 反転、1 → 5 で反転、3 は反転だけ、5 → 0)。エネルギーの較正は元の番号。EricaNext の HA_Calc に `Emu_Mode`(既定 0)として追加。
+- パラメータのフォルダ `~/smile2p_sim_data/emulator_param/`(README.txt):
+  XMDF/YMDF_HA*.dat = `XMDF.dat` / `YMDF.dat`(エミュレータの電荷分割用の MDF、全 HA 共通と推定)、Cal_HA*.dat = HAEmulator の出力(run によらず同じ)、
+  HAs.pos = param/20190528(データと同じ)、drift_velocity_sim.dat = シミュレーションのヒットのクロックから(offset 93、0.3770 mm/clock。
+  端は微分の最大の ±20 クロックでガウス関数をフィット。この方法を Per02 に当てると DriftVelocity.ipynb の 10 分ごとのフィットより 0.7 % 速い)。
+- 設定: `config/smile2p_sim_d10_recon.json`(`--set ReadData.data_dir=<raw>`)。`ericanext_config.load()` でも `{sim_data}` を使えるようにした。
+- 結果(1927 イベント、リファレンスは d10 の 20 run = 200000 イベント、`Reconstruct/s2t`):
+
+  | | EricaNext | リファレンス | KS p |
+  | --- | --- | --- | --- |
+  | err_flag == 0 の割合 | 21.0 %(404) | 19.9 % | |
+  | Eg の中央値 [keV] | 950 | 923 | 0.49 |
+  | Ke(Ee)の中央値 [keV] | 74.3 | 74.3 | 0.32 |
+  | Eg + Ke | 1050 | 1030 | 0.84 |
+  | Len_TRA [mm] | 137 | 152 | **0.029** |
+  | Pe_TRA の z [mm] | 212 | 220 | **0.0075** |
+
+  エネルギーは一致。z に関わる量がずれる: Pe_TRA の z の分布のドリフト面側の山がリファレンス 330〜340 mm、EricaNext 320〜330 mm。
+  → ドリフト速度のファイル(offset と速度)がリファレンスと違うため。
+- 小野田がリファレンスの再構成のファイルを `hikaru3_analysis2/par_for_sim_reconstruct/` に置いた: drift_velocity.dat は
+  **offset 85、0.38 mm/clock で一定**(エミュレータの入力の `DriftVel 38`、`Offset_for_ETCC 85` そのもの)、Calibration20190130.dat は param/20190528 と同じ、
+  setting.mac は上の設定と同じ。→ `emulator_param/drift_velocity.dat` にコピーし、設定をこれに変更。
+- やり直し(同じ 1927 イベント): Pe_TRA の z は 216 / 220 mm、KS p = **0.099**(一致)。Eg, Ke は変わらず一致。
+  Len_TRA は 137 / 152 mm、p = 0.030 のまま(404 行、5 つの量を比べた中での p なので判断できない)。
+- 8 × 4M(seed 11〜18、7428 イベント): 再構成は Len_TRA 152.2 / 152.1 mm(p = 0.08)、Pe_TRA の z p = 0.82、err_flag == 0 の割合 19.3 / 19.9 % で一致
+  (Len_TRA の差は統計のゆらぎだった)。ただし raw の段階で TPC の信号が大きい: 全 9355 イベント対リファレンス 5 run(50000 イベント)で
+  FADC の電荷の中央値 ×1.11、ストリップのヒット ×1.10(KS p ≈ 1e-9)。ヒットの記録の数(時間の長さ)は同じ。
+- 原因の切り分け: TPC の真のエネルギー損失は同じ(中央値 73.2 / 73.6 keV)、電荷 ÷ エネルギー損失が 5〜13 % 大きい。
+  移植したコードは hikaru3 側の SMILE_tool_box_v2.20(リファレンスの run で動いた版)と全ファイル同じ。ポリヤ分布の乱数の平均は 1001(理論 1000)。
+  IwakiTemp_mod.root は IwakiTemp.root のちょうど半分の大きさ(原因ではない)。
+- **原因: Geant4 のステップの細かさ。** TPCEmulator はステップごとに CalcCluster で種電子の数を決める(15 eV 未満のステップは必ず 1 個など)ので、
+  ステップが細かいほど 1 keV あたりの電子が増える。e± のステップ(eIoni の finalRange、msc)を Geant4 10.4 と同じにした `em_msc = urban` で 8 × 1M:
+
+  | 設定 | TPC のステップ / keV(中央値) | 1 ステップのエネルギー(中央値) | FADC の電荷の比(対リファレンス) | KS p |
+  | --- | --- | --- | --- | --- |
+  | gs(Geant4 11 の既定) | 14.3 | 21.5 eV | 1.113 | 2e-9 |
+  | urban(リファレンス相当) | 9.3 | 47.9 eV | 0.95 | 0.41 |
+
+  → urban でリファレンスと一致。エミュレータの電離の計算が Geant4 のステップの細かさに依存しているのが根本の問題
+  (どちらの物理設定が正しいかではなく、エミュレータの結果が Geant4 の版・設定で 1 割変わる)。
+- 2026-10-14 決定(小野田): **このまま(既定は gs)でよい。** 細かいステップで 1 割多いのも物理的におかしくはない。
+  リファレンスと合わせたいときは `--set physics.em_msc=urban`。
+
 ## 次にやること
 
 1. ~~SMILE の物理リスト~~(済み。Gd の中性子捕獲は未。Geant4 11 で消えた `G4HadronCaptureProcess` を使っているので書き直しが要る)

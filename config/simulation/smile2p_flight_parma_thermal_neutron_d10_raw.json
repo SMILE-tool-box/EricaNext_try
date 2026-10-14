@@ -1,0 +1,127 @@
+{
+  "_comment": [
+    "Same as smile2p_flight_parma_thermal_neutron_d10, plus the detector response and the raw files",
+    "(SMILE_tool_box SMILE_2p -> TPC_emulator -> Emu_HA -> EmuWrite2p, DAQ_Mode 3), with the parameters of",
+    "the reference run hikaru3_analysis2/BGsim/thermal_neutron_g10/simulation/d10 (HabocStatus.scl).",
+    "Run: python3 run_script/run_sim.py smile2p_flight_parma_thermal_neutron_d10_raw -n 1000000 -o edep.root --raw-dir rawdata --seed 1",
+    "The raw files in --raw-dir can be read by ReadData like measured data (config/smile2p_sim_raw.json)."
+  ],
+  "environment": {
+    "_G4NEUTRONHPDATA": "G4NDL4.7.1 + the Ar-36/38 files of G4NDL4.5 (scripts/sim_env/make_g4ndl_ar36fix.sh); plain G4NDL4.7.1 treats Ar-36 with the Ar-37 data",
+    "G4NEUTRONHPDATA": "{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix"
+  },
+  "detector": {
+    "module": "SMILE2pGeometry",
+    "parameters": {
+      "geometry_dir": "{sim_data}/SMILE_2p_Geo",
+      "geometry_type": "flight",
+      "_ha_position_file": "the SMILE_tool_box simulation default (the reconstruction uses param/20190528/HAs.pos)",
+      "ha_position_file": "{sim_data}/HA_Parameters_20190403_position_only/HAs.pos",
+      "gas_pressure": 2.0
+    }
+  },
+  "physics": {
+    "module": "SMILEPhysicsList",
+    "parameters": {
+      "_em_msc": "gs: Geant4 11 G4EmLivermorePhysics (Goudsmit-Saunderson); urban: e+- multiple scattering of the reference (Geant4 10.4)",
+      "em_msc": "gs",
+      "_gd_physics": "sim.mac GdPhysics 1",
+      "gd_physics": true,
+      "gd155_table": "{sim_data}/Gd_capture/Gd155.dat",
+      "gd157_table": "{sim_data}/Gd_capture/Gd157_org.dat",
+      "cut_value": 0.001,
+      "low_energy_limit": 0.25
+    }
+  },
+  "source": {
+    "module": "ParmaCRPrimaryGen",
+    "parameters": {
+      "particle": "neutron",
+      "flux_file": "/home/onoda/hikaru3_analysis2/BGsim/thermal_neutron_g10/parma_flux/parma_flux_d10_g10_thermal.root",
+      "_plane": "sim.mac ParaSrcSize 3000, ParaSrcDistance 3000 (mm)",
+      "plane_size": 300.0,
+      "plane_distance": 300.0
+    }
+  },
+  "geant4": {
+    "module": "Geant4Body",
+    "parameters": {
+      "random_engine": "MTwistEngine",
+      "random_initialization_mode": 1,
+      "random_seed": 1,
+      "output_random_status": false,
+      "verbose": 0
+    }
+  },
+  "pickup": [
+    {
+      "module": "EdepPickUp",
+      "parameters": {
+        "output": "edep.root",
+        "_ha_off_file": "sim.mac HA_OffFile (SMILE_2p::DepositInPSA drops these PMTs)",
+        "ha_off_file": "{sim_data}/HA_OFF.dat"
+      }
+    }
+  ],
+  "response": [
+    {
+      "module": "SimTrigger",
+      "parameters": {
+        "_daq_mode": "sim.mac DAQ_Mode 3: TPC && scintillator",
+        "daq_mode": 3,
+        "collect_number": 0
+      }
+    },
+    {
+      "module": "TPCEmulator",
+      "parameters": {
+        "_values": "HabocStatus.scl [TPC_emulator] of the reference run",
+        "w_value": 27.22,
+        "Fano_Factor": 0.2,
+        "DriftVel": 38.0,
+        "DiffTrans": 0.26,
+        "DiffLong": 0.24,
+        "ReadOutPitch": 0.8,
+        "GEM_Gain": 20.0,
+        "IwakiTemplate": "{sim_data}/IwakiTemp.root",
+        "_GainMap": "reference: parameters/20190124/Calibration20190130.dat (same file name as the data's param/20190528)",
+        "GainMap": "{data_top}/param/20190528/Calibration20190130.dat",
+        "ClusterData": "{sim_data}/cluster.txt",
+        "BaseLineFluctuation": 21.481,
+        "Vth_Anode": 6000,
+        "Vth_Cathode": 12000,
+        "DAC_Survey": 9000,
+        "Offset_for_TPC": 85,
+        "Offset_for_ETCC": 85,
+        "Gain_Modify_Amp": 1.0651,
+        "Debug_Mode": 0,
+        "Calc_Mode_Cluster": 0,
+        "Fiducial_Modify_Flag": 1,
+        "upic_size": 30.72,
+        "drift_offset": 3.0,
+        "daq_mode": 3,
+        "random_seed": 101
+      }
+    },
+    {
+      "module": "HAEmulator",
+      "parameters": {
+        "ChargeDivTemp": "{sim_data}/charge.div",
+        "PMT_MapDir": "{sim_data}/PMT_Map",
+        "E_Res_662": "{sim_data}/Pixel_Resolution_20190528.dat",
+        "cal_output_dir": "rawdata",
+        "random_seed": 102
+      }
+    },
+    {
+      "module": "RawWriter2p",
+      "parameters": {
+        "output_dir": "rawdata",
+        "truth_file": "rawdata/sim_truth.root",
+        "Write_HA_Data": true,
+        "Write_Anode_Data": true,
+        "Write_Cathode_Data": true
+      }
+    }
+  ]
+}
