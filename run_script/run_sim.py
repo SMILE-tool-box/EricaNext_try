@@ -7,7 +7,7 @@ config/simulation/*.json. Run after `source ~/opt/setup_sim.sh`.
     python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10_raw -n 100000 -o edep.root --raw-dir rawdata
 
 The config has the sections environment, detector, physics, source, geant4, pickup and
-(optional) response (see config/simulation/README.md). The chain is
+(optional) response (see config/README.md). The chain is
     detector -> physics -> source -> geant4 (Geant4Body) -> StandardUserActionAssembly -> pickup...
     -> response... (SimTrigger -> TPCEmulator -> HAEmulator -> RawWriter2p: raw files like measured data)
 Modules are looked up in EricaSimPy, then anlgeant4.

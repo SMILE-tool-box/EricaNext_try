@@ -17,7 +17,7 @@
 | スクリプト | すること | 設定ファイル |
 | --- | --- | --- |
 | [`run_script/run_chain.py`](run_script/run_chain.py) | 生データ(実データ・シミュレーションの raw)の **再構成** | [`config/<名前>.json`](config/) |
-| [`run_script/run_sim.py`](run_script/run_sim.py) | Geant4 の **シミュレーション**(検出器の応答をつけると実データと同じ形式の raw も書く) | [`config/simulation/<名前>.json`](config/simulation/README.md) |
+| [`run_script/run_sim.py`](run_script/run_sim.py) | Geant4 の **シミュレーション**(検出器の応答をつけると実データと同じ形式の raw も書く) | [`config/simulation/<名前>.json`](config/README.md) |
 
 ```bash
 cd run_script
@@ -61,7 +61,7 @@ python3 run_chain.py smile2p_sim_d10_recon -o sim_recon.root --set ReadData.data
 | `--set 節.キー=値` | パラメータの上書き(何回でも)。例: `physics.em_msc=urban`、`response.TPCEmulator.Vth_Anode=6000` |
 
 詳しい説明(出力の中身、例、中でしていること)は [`run_script/README.md`](run_script/README.md)、
-設定ファイルの書き方は下の「[設定ファイルで実行する](#設定ファイルで実行する)」と [`config/simulation/README.md`](config/simulation/README.md) にあります。
+設定ファイルの書き方は下の「[設定ファイルで実行する](#設定ファイルで実行する)」と [`config/README.md`](config/README.md) にあります。
 
 ## 解析チェーン
 
@@ -148,6 +148,7 @@ flowchart TD
 | `tutorials_simulation/1_PointSourceSim/` | 点線源のシミュレーション(準備中) |
 | `tutorials_simulation/2_ParallelBeamSim/` | 平行光シミュレーション(準備中) |
 | `tutorials_simulation/3_CosmicBGSim/` | 宇宙線バックグラウンドシミュレーション(準備中) |
+| [`tutorials_simulation/4_PARMAFlux/`](tutorials_simulation/4_PARMAFlux/README.md) | PARMA で宇宙線のフラックスを作る(準備中) |
 
 > **注意（Jupyter 実行時）**: `CalcFADC` は波形積分を `std::thread` で行うため、Jupyter の
 > ipykernel プロセス内でチェーンをそのまま実行すると、カーネルごと落ちることがあります
@@ -234,19 +235,8 @@ cmake ../source/ \
 ### 設定ファイルで実行する
 
 モジュールの順番とパラメータ、データ・較正ファイルの場所は、測定期間ごとの設定ファイル
-[`config/*.json`](config/) にまとめています(SMILE_tool_box の参照実行と同じ値)。
-`run_script/run_chain.py`(チュートリアルもこれを使って実行します)がこれを読むので、
-値を変えるときは設定ファイルだけを直します。各スクリプトの使い方は [`run_script/README.md`](run_script/README.md) にあります。
-
-```bash
-cd run_script
-python3 run_chain.py smile2p_20190701_Per02 -o per02_out.root              # 全イベントを再構成
-python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000          # 先頭 1 万イベント
-python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --compression 505   # 生データツリー
-```
-
-- `_` で始まるキー(`_comment`, `_setting_mac`, `_note`, `_doc`, `_units`)は説明用で、モジュールには渡しません。各モジュールの `_doc` に全パラメータの説明、`_units` に単位のあるパラメータの単位を書いています。パラメータを足すときは、この 2 つにも書いてください。
-- 新しい測定期間は、既存のファイルをコピーしてデータの場所とパラメータを書き換えます。
+[`config/*.json`](config/) にまとめています(SMILE_tool_box の参照実行と同じ値)。値を変えるときは設定ファイルだけを直します。
+実行のしかたは上の「[使い方(まずここ)](#使い方まずここ)」、設定ファイルの書き方は [`config/README.md`](config/README.md) にあります。
 
 #### 自分の環境に合わせて変える場所
 

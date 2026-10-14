@@ -315,7 +315,7 @@ x・y の面は z が 9〜309 mm)を numpy で計算: **1.631 ± 0.013 %**(リ�
 - 検出器・物理モデル・線源・乱数・記録を 1 つの JSON にまとめる形にした(小野田の希望: モデルの選択も検出器の設定と一緒に config から)。
   `config/simulation/*.json` + `run_script/run_sim.py`(`ericanext_config.load_sim()`、`{sim_data}`, `{home}` を置き換え)。
   節: `environment`(`G4NEUTRONHPDATA` など。Geant4 の初期化の前に設定)、`detector`, `physics`, `source`, `geant4`, `pickup`。
-  `--set 節.キー=値` で上書き。説明は `config/simulation/README.md`。
+  `--set 節.キー=値` で上書き。説明は `config/README.md`(当時は `config/simulation/README.md`)。
 - **バグ**: `SMILEPhysicsList` のコンストラクタの既定値 `lowEnergyLimit_(0.25)` に keV を掛けていなかった
   → Geant4 の内部単位(MeV)で 0.25 MeV = **250 keV** になっていた(リファレンスは 250 eV)。
   config から値を渡すと単位が掛かるので正しく 0.25 keV になり、古い試験スクリプトと結果が違ったことで発覚。

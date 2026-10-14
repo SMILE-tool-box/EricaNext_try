@@ -101,7 +101,7 @@ a.run(n_events)
 
 シミュレーション(Geant4 + anlgeant4)を、設定ファイル `config/simulation/*.json` で実行します。
 設定ファイルに検出器・物理モデル・線源・乱数・記録・検出器の応答をすべて書いておき、このスクリプトがそれを読んでチェーンを組みます。
-設定ファイルの節とパラメータは [`config/simulation/README.md`](../config/simulation/README.md) にあります。
+設定ファイルの書き方は [`config/README.md`](../config/README.md) にあります。
 
 ```bash
 source ~/opt/setup_sim.sh          # Geant4 とシミュレーション用の ANLNext(毎回、最初に 1 回)

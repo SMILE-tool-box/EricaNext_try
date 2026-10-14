@@ -9,3 +9,4 @@
 | [`1_PointSourceSim/`](1_PointSourceSim/) | 点線源のシミュレーション(較正データと同じ配置の Cs-137 など)(準備中) |
 | [`2_ParallelBeamSim/`](2_ParallelBeamSim/) | 平行光シミュレーション(準備中) |
 | [`3_CosmicBGSim/`](3_CosmicBGSim/) | 宇宙線バックグラウンドシミュレーション(準備中) |
+| [`4_PARMAFlux/`](4_PARMAFlux/README.md) | PARMA で宇宙線のフラックスを作る(`3_CosmicBGSim` の入力)(準備中) |
