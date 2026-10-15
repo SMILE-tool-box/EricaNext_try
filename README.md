@@ -122,6 +122,73 @@ flowchart TD
 | `Reconstruct` | `Reconstruct` | 再構成ツリー `Reconstruct/single_hit` |
 | `RawTreeWriter` | (なし) | 生データツリー `RawTreeWriter/raw` |
 
+## シミュレーションチェーン
+
+```mermaid
+flowchart TD
+  CFG[("設定ファイル<br>config/simulation/*.json")]
+  subgraph G4["層0 Geant4(run_sim.py が節の順につなぐ)"]
+    GEO["SMILE2pGeometry<br>形状(.mqo + HAs.pos)"]
+    PHY["SMILEPhysicsList<br>物理モデル(Livermore、HP 中性子、Gd 捕獲)"]
+    SRC["ParmaCRPrimaryGen など<br>一次粒子(PARMA の宇宙線、点線源)"]
+    BODY["Geant4Body<br>粒子を飛ばす"]
+  end
+  subgraph L1["層1 記録"]
+    EP["EdepPickUp<br>TPC・シンチ・アンチのステップごとのエネルギー損失"]
+  end
+  subgraph L2["層2 検出器の応答(response の節)"]
+    TRG["SimTrigger<br>イベントを集める条件(DAQ モード)"]
+    TE["TPCEmulator<br>電離・拡散・増幅・閾値"]
+    HE["HAEmulator<br>分解能・電荷分割"]
+  end
+  subgraph L3["層3 出力"]
+    EDEP["edep.root<br>エネルギー損失のツリー(真の値)"]
+    RW["RawWriter2p"]
+    RAW[("raw ファイル<br>uTPC_anode/cathode*.raw, HA*.raw<br>(実データと同じ形式)")]
+    TRUTH["sim_truth.root、Cal_HA*.dat"]
+  end
+  DATA["シミュレーションのデータ<br>{sim_data}: .mqo、テンプレート、MDF など<br>PARMA のフラックス、TPC のゲインマップ"]
+
+  CFG -.-> G4
+  DATA -.-> GEO
+  DATA -.-> SRC
+  DATA -.-> TE
+  DATA -.-> HE
+  GEO --> BODY
+  PHY --> BODY
+  SRC --> BODY
+  BODY -- "Geant4 のステップ" --> EP
+  EP --> EDEP
+  EP -- "e_tpc, e_scinti, e_anti" --> TRG
+  TRG -- "条件を満たすイベントだけ先へ" --> TE
+  EP -- "TPC のステップ(エネルギー、位置)" --> TE
+  EP -- "シンチのステップ(立体、エネルギー)" --> HE
+  TE -- "ヒット、FADC 波形、時刻" --> RW
+  HE -- "HA の ADC" --> RW
+  EP -- "一次粒子、エネルギー損失" --> RW
+  RW --> RAW
+  RW --> TRUTH
+  RAW -- "run_chain.py(上の解析チェーン)" --> RECO["Reconstruct/single_hit"]
+```
+
+- 矢印はデータの受け渡し(ラベルは渡すもの)、点線は設定ファイルとデータファイルの読み込みです。
+- 実際の実行順は `SMILE2pGeometry → SMILEPhysicsList → ParmaCRPrimaryGen → Geant4Body → StandardUserActionAssembly → EdepPickUp → SimTrigger → TPCEmulator → HAEmulator → RawWriter2p`
+  (SMILE_tool_box の haboc のマクロ `[Def] SMILE_2p, TPC_emulator, Emu_HA, EmuWrite2p` と同じ流れ)。`response` の節が無い設定では `EdepPickUp` で終わります。
+- `SimTrigger` は条件を満たさないイベントで `AS_SKIP` を返し、そのイベントでは後ろのモジュール(応答と raw の書き出し)を動かしません。
+- raw ファイルは実データと同じ形式なので、上の解析チェーンでそのまま再構成できます(設定 `config/smile2p_sim_d10_recon.json`)。
+
+| モジュール | SMILE_tool_box での名前 | 主な出力 |
+| --- | --- | --- |
+| `SMILE2pGeometry` | `SMILE_2p_Geo` | SMILE-2+ の形状(flight / ground / no_vessel) |
+| `SMILEPhysicsList` | `SMILE_PhysicsList` | 物理モデル(e± の多重散乱 gs / urban、Gd の捕獲) |
+| `ParmaCRPrimaryGen` | `SMILE_2p_PA_CR` | PARMA のフラックスに従う宇宙線の一次粒子 |
+| `EdepPickUp` | `SMILE_2p_Step` | エネルギー損失のツリー `edep` |
+| `SimTrigger` | `DAQ_Mode` | イベントを集めるかどうか |
+| `TPCEmulator` | `TPC_emulator` | ボードごとのヒットと FADC 波形 |
+| `HAEmulator` | `Emu_HA` | HA の ADC、`Cal_HA*.dat` |
+| `RawWriter2p` | `EmuWrite2p` | raw ファイル、真の値 `sim_truth.root` |
+| `StepLimit` | (なし) | ステップの長さの上限(今の設定ファイルでは使っていない) |
+
 ## 検証状況
 
 各モジュールは SMILE_tool_box_v2.20 と同じ処理になるよう移植し、20190701_Per02 のデータで

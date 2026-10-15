@@ -455,4 +455,12 @@ SMILE_tool_box_v2.20 の 3 モジュール(ローカルの写し `~/SMILE_tool_b
 - 再構成用のパラメータ `{sim_data}/emulator_param` をノートブックの中で作る手順にした(XMDF/YMDF の写し、HAEmulator の Cal_HA、
   データの HAs.pos、TPCEmulator の DriftVel と Offset_for_ETCC から drift_velocity.dat)。既存のものとファイルの中身が一致。
 - 観察: err_flag == 0 のイベントで `Ke / E_tpc` の中央値が約 0.8。エネルギーはすべて x, y が ±150 mm の中(読み出し範囲の外へのもれではない)。
-  原因は未調査。
+  再構成の `Ke` の分布は参照と一致するので、SMILE_tool_box と同じ振る舞いとしてこのまま使う(小野田の判断)。
+
+## SMILE-3 に向けた改善事項
+
+SMILE_tool_box と同じ振る舞いなので今は直さないが、SMILE-3 では見直すべき点。
+
+| 項目 | 中身 | 見つけた日 |
+| --- | --- | --- |
+| 再構成の `Ke` が真の値より小さい | シミュレーションの raw を再構成すると `Ke / E_tpc` の中央値が約 0.8(d10 の熱中性子、err_flag == 0 の 48 イベント)。分解能による広がりではなく偏り。読み出し範囲の外へのもれではない。TPC の応答(電離、増幅、閾値)と較正(`TPC_Calibration`)のどこで小さくなるかを調べる | 2026-10-14 |
