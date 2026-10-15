@@ -19,7 +19,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.join(HERE, "..")
-sys.path.insert(0, os.path.join(REPO, "simulation", "install", "lib", "python"))
+sys.path.insert(0, os.path.join(REPO, "simulation_source", "install", "lib", "python"))
 sys.path.insert(0, os.path.join(REPO, "config"))
 import ericanext_config as ec
 

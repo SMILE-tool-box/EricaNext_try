@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 # EricaNext simulation (Geant4 via anlgeant4). Build in the simulation environment:
 #   source ~/opt/setup_sim.sh
-#   cmake -S simulation -B simulation/build -DCMAKE_INSTALL_PREFIX=simulation/install && cmake --build simulation/build --target install
+#   cmake -S simulation_source -B simulation_source/build -DCMAKE_INSTALL_PREFIX=simulation_source/install && cmake --build simulation_source/build --target install
 project(EricaSim CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release CACHE STRING "build type")

@@ -165,7 +165,7 @@ for e in cfg["pickup"] + cfg.get("response", []):        # EdepPickUp → SimTri
 chain.run(n)
 ```
 
-モジュールは `EricaSimPy`(`simulation/modules/`)、無ければ anlgeant4 から探します。
+モジュールは `EricaSimPy`(`simulation_source/modules/`)、無ければ anlgeant4 から探します。
 
 ---
 

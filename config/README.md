@@ -102,7 +102,7 @@
 ```
 
 チェーンは `detector → physics → source → geant4 → StandardUserActionAssembly → pickup → response` の順に組まれます。
-`module` は `EricaSimPy`(`simulation/modules/`)、無ければ anlgeant4 から探します。
+`module` は `EricaSimPy`(`simulation_source/modules/`)、無ければ anlgeant4 から探します。
 
 | 節 | 形 | モジュール | 主なパラメータ |
 | --- | --- | --- | --- |

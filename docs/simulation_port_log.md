@@ -63,19 +63,19 @@ anlgeant4 で Python から使えるモジュール: `Geant4Body`, `Geant4Simple
 `NucleusPrimaryGen`, `NucleusPrimaryGenInVolume`, `StandardUserActionAssembly` など。
 ComptonSoft 自身の物理リストは Ruby 側にしか出ていないので、SMILE の物理リストは EricaNext 側に作る。
 
-## 2026-10-12 シミュレーション用パッケージの骨組み(`simulation/`)
+## 2026-10-12 シミュレーション用パッケージの骨組み(`simulation/`、2026-10-14 に `simulation_source/` に改名)
 
 実データ用(`source/`、`/usr/local` の ANLNext)とは使う ANLNext が違う(ベクトル有効)ので、別の CMake プロジェクトにした。
 
 ```
-simulation/
+simulation_source/
 ├── CMakeLists.txt          libEricaSim.so と Python 拡張 EricaSimPy
 ├── include/, src/          モジュール
 ├── pyext/EricaSimPy.i
 └── test/                   動作確認用(smoke_test.gdml, run_smoke_test.py)
 ```
 
-ビルド: `source ~/opt/setup_sim.sh; cmake -S simulation -B simulation/build -DCMAKE_INSTALL_PREFIX=simulation/install; cmake --build simulation/build --target install`
+ビルド: `source ~/opt/setup_sim.sh; cmake -S simulation_source -B simulation/build -DCMAKE_INSTALL_PREFIX=simulation/install; cmake --build simulation/build --target install`
 
 作ったモジュール:
 
@@ -107,7 +107,7 @@ simulation/
 
 ## 2026-10-12 SMILE-2+ の形状
 
-SMILE_tool_box のコードを `simulation/vendor/` にそのまま取り込み(`vendor/README.md`)、
+SMILE_tool_box のコードを `simulation_source/vendor/` にそのまま取り込み(`vendor/README.md`)、
 `SMILE2pGeometry`(`VANLGeometry`)から `SMILE_2p_Geo` を呼ぶ形にした。
 
 | 取り込んだもの | 元 | 直したところ |
@@ -120,7 +120,7 @@ SMILE_tool_box のコードを `simulation/vendor/` にそのまま取り込み(
 `SMILE2pGeometry` のパラメータ: `geometry_dir`(GeometryCADdir)、`geometry_type`(ground / flight / no_vessel)、
 `ha_position_file`(HA_PositionFile)、`gas_pressure`(TPC_Gas_Pressure、atm)。
 
-動作確認(`simulation/test/run_smile2p_cs137.py`、ground、Cs-137 を (0, 0, −1626) mm から半頂角 0.25 rad、2000 個):
+動作確認(`simulation_source/test/run_smile2p_cs137.py`、ground、Cs-137 を (0, 0, −1626) mm から半頂角 0.25 rad、2000 個):
 
 - 50 個のメッシュのボリュームの重なりチェックはすべて OK。
 - **座標系は実データと同じ**(原点 μ-PIC、z 下向き)。TPC でのエネルギー損失は x −150〜69, y −140〜141, z 48〜319 mm、シンチは z 149〜368 mm。
@@ -182,7 +182,7 @@ ETCC の中 52.4398、下部の回路 138.403、anti 2.14172、ゴンドラ 53.3
   ファイルが無くてもエラーにならず、表が 0 のままだと連続成分のループが終わらない。
   → 同じファイルが `hikaru3_analysis2/Gd155.dat`, `Gd157_org.dat` にあった(小野田)。`~/smile2p_sim_data/Gd_capture/` にコピー(md5 一致、各 200×200 = 40000 個、値は 0〜1)。
 
-### 移植(`simulation/vendor/gd_capture/`)
+### 移植(`simulation_source/vendor/gd_capture/`)
 
 - `GdCaptureGammas_ggarnet`: そのまま。表のパスを `SetDataFiles()` で渡す形にし、開けない・数が足りないときは `FatalException`。
 - `GdParticleHPCaptureFS`: Geant4 11 の API(`Init` の const 参照、`G4Cache` の `theResult`、整数の `theBaseA/Z`)に合わせた。
@@ -195,7 +195,7 @@ ETCC の中 52.4398、下部の回路 138.403、anti 2.14172、ゴンドラ 53.3
   断面積 `G4NeutronCaptureXS` + `G4ParticleHPCaptureData` を登録。
 - `SMILEPhysicsList` のパラメータ `gd_physics`, `gd155_table`, `gd157_table`。リファレンスと同じく FTFP_BERT_HP の直後に登録。
 
-### 確認(`simulation/test/run_gd_capture_test.py`)
+### 確認(`simulation_source/test/run_gd_capture_test.py`)
 
 1 m の GSO の立方体の中心から熱中性子(25 meV)を 2000 個。シンチのエネルギー損失の合計(≒ 捕獲ガンマの合計):
 
@@ -208,7 +208,7 @@ ETCC の中 52.4398、下部の回路 138.403、anti 2.14172、ゴンドラ 53.3
   平均 7.98 MeV ≒ 0.815×7.87 + 0.185×8.46 = 7.98 → ほぼ全部吸収されている。
 - なし: Geant4 標準(ENDF)では Q 値(7.94, 8.54)のピークに加えて 6.35 MeV にピークがあり、ガンマの出方がかなり違う。
   → 熱中性子のバックグラウンドでは Gd の模型の有無が効く。
-- `.gitignore` の `simulation/test/*.gdml` が手書きの試験用 GDML まで無視していたので、`smoke_test.gdml`, `gd_capture_test.gdml` を例外にした。
+- `.gitignore` の `simulation_source/test/*.gdml` が手書きの試験用 GDML まで無視していたので、`smoke_test.gdml`, `gd_capture_test.gdml` を例外にした。
 
 ## 2026-10-13 宇宙線の一次粒子(SMILE_2p_PA_CR → ParmaCRPrimaryGen)
 
@@ -218,14 +218,14 @@ ETCC の中 52.4398、下部の回路 138.403、anti 2.14172、ゴンドラ 53.3
   出発点は方向に垂直な一辺 `ParaSrcSize` の正方形の上で一様、原点から `ParaSrcDistance` だけ上流。
 - リファレンスは毎イベント `gRandom->SetSeed(CLHEP の種)` していた(種は毎イベント時刻から作るので実害なし)。
   EricaNext では同じアルゴリズム(累積和で bin を選び、bin の中で一様)を Geant4 の乱数で行う → anlgeant4 の種で再現できる。
-- `simulation/modules/ParmaCRPrimaryGen/ParmaCRPrimaryGen.cc`(`anlgeant4::BasicPrimaryGen`)。パラメータ `particle`, `flux_file`, `flux_histogram`(空なら粒子から)、
+- `simulation_source/modules/ParmaCRPrimaryGen/ParmaCRPrimaryGen.cc`(`anlgeant4::BasicPrimaryGen`)。パラメータ `particle`, `flux_file`, `flux_histogram`(空なら粒子から)、
   `plane_size`, `plane_distance`(既定はリファレンスのコードの既定 3 m / 1.5 m。リファレンスの run は sim.mac で 3000 / 3000 mm)。
   run の終わりに等価な観測時間 N / (面積 × 全フラックス) を表示する(d10 熱中性子: 全フラックス 0.2048 /cm²/s、1M 個で 54.3 s)。
 - `EdepPickUp` に `ha_off_file`: リファレンスの `SMILE_2p::DepositInPSA` と同じく、`HA_OFF.dat` の PMT(8 個)のシンチのエネルギー損失を捨てる
   (`HA_OnOff[HA][Get_PMT_ID(OFF_PMT-1, ID_TO_NAME)-1]`、体積名 `scinti_<bottom|side>_<HA>_<PMT>_<pixel>` の PMT 名と比べる)。
 - リファレンスのトリガ(`GetETCCTriger`): anti にエネルギー損失なし && シンチにあり && TPC にあり(しきい値なし)。
   `ETCCcount.scl` の `Triggered`。`DAQ_Mode 3` では TPC && シンチ のイベントを `Collect_Number`(10000)個集めたら止まる → `EmuWrite2p/sim` の 10000 イベント。
-- 実行: `simulation/test/run_smile2p_parma_cr.py <flux.root> [n] [--seed] [-o]`(sim.mac と同じ設定: flight、Gd、2 気圧、20190403 の HAs.pos、HA_OFF)。
+- 実行: `simulation_source/test/run_smile2p_parma_cr.py <flux.root> [n] [--seed] [-o]`(sim.mac と同じ設定: flight、Gd、2 気圧、20190403 の HAs.pos、HA_OFF)。
   1 プロセス 1.1 GB、初期化 20 秒、約 2000 イベント/秒(d10 熱中性子)。
 - 形状の警告(`flange_support` と `bCALET` の 12 µm の重なりなど)はリファレンスの `erica.log` にも同じものがある(`.mqo` 由来)。
 
@@ -429,7 +429,7 @@ SMILE_tool_box_v2.20 の 3 モジュール(ローカルの写し `~/SMILE_tool_b
 
 ## 2026-10-15 simulation のモジュールの置き場所、終了コード
 
-- 小野田の希望で、`simulation/src`, `simulation/include` を `simulation/modules/<モジュール名>/`(データ解析の `source/modules` と同じ形)に変更
+- 小野田の希望で、`simulation_source/src`, `simulation_source/include` を `simulation_source/modules/<モジュール名>/`(データ解析の `source/modules` と同じ形)に変更
   (`git mv`)。CMakeLists.txt は `modules/*` のフォルダを集める。並べ替えの前後で同じ種の結果がバイト単位で一致
   (Geant4 の部分 187 イベント、真の値 55 イベント、HA の raw 18 ファイル)。
 - `anlnext.AnalysisChain.run()` は初期化に失敗しても何も返さないので、`run_script/anl_run.py` の `run_checked()`(同じ手順で状態を確かめる)
@@ -445,3 +445,14 @@ SMILE_tool_box_v2.20 の 3 モジュール(ローカルの写し `~/SMILE_tool_b
 4. ~~Cs-137 の点線源を SMILE-2+ の形状で動かす~~(済み)
 5. リファレンスのシミュレーションとの比較(同じ設定で SMILE_tool_box を回した結果が必要)
 6. TPC_emulator / Emu_HA / EmuWrite2p(検出器の応答と raw ファイルの書き出し)
+
+## 2026-10-14 フォルダ名、シミュレーションの DataIO チュートリアル
+
+- `simulation/` を `simulation_source/` に改名(`git mv`、build と install は作り直し)。`run_sim.py` の import の場所と `.gitignore` も変更。
+- `tutorials_simulation/1_DataIO/DataIO_example.ipynb` を追加(既存の準備中のフォルダは 2_〜5_ に番号を付け直し)。
+  d10 の熱中性子を 100 万個(seed 1): エネルギーを落としたイベント 9193、トリガー(daq_mode 3)270、
+  再構成の err_flag == 0 は 48(17.8 %)。出力は `tutorials_simulation/cache/`(リポジトリに入れない)。
+- 再構成用のパラメータ `{sim_data}/emulator_param` をノートブックの中で作る手順にした(XMDF/YMDF の写し、HAEmulator の Cal_HA、
+  データの HAs.pos、TPCEmulator の DriftVel と Offset_for_ETCC から drift_velocity.dat)。既存のものとファイルの中身が一致。
+- 観察: err_flag == 0 のイベントで `Ke / E_tpc` の中央値が約 0.8。エネルギーはすべて x, y が ±150 mm の中(読み出し範囲の外へのもれではない)。
+  原因は未調査。
