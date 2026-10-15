@@ -22,15 +22,16 @@
 | [`3_Backprojection/`](3_Backprojection/Backprojection.ipynb) | 較正データのバックプロジェクション像 |
 | `4_MakeCalibration/` | 較正ファイルを作る(全イベントの生データツリーから) |
 | ├ [`DriftVelocity`](4_MakeCalibration/DriftVelocity.ipynb) | ドリフト速度と offset(`drift_velocity.dat`)。研究室のマクロ `drift_speed_s2p_v3.C` と同じ手順 |
-| └ [`GainMap`](4_MakeCalibration/GainMap.ipynb) | 1 ヒットのスペクトル(ASIC ごと/ボードごと、閾値を選べる)。ゲインマップ(`Calibration*.dat`)は **準備中**(Ba の線源のデータで作る) |
+| ├ [`GainMap`](4_MakeCalibration/GainMap.ipynb) | TPC のゲインマップ(`Calibration*.dat`、$K_a$, $K_b$)。Ba-133 の較正データ(2017-12-19/20、12 run)の 1 ヒットのスペクトルの 30.85 / 8.04 keV のピークにガウス関数を当てて作る |
+| └ [`reference/GainMap_Calamity`](4_MakeCalibration/reference/GainMap_Calamity.ipynb) | 参照用: 研究室のプログラム Calamity と同じ手順(ピークの位置は `TSpectrum` のビンの位置)で作ったゲインマップ |
 
 シミュレーションのチュートリアルは別のフォルダ [`../tutorials_simulation/`](../tutorials_simulation/README.md) にあります。
 
 ## 準備
 
 1. EricaNext_try をビルドしておく(リポジトリ直下の `README.md` の「インストール」)。
-2. データを研究室サーバーから `~/smile2p_data` にコピーする(手順は 1_DataIO の 1 節)。
-   別の場所に置いた場合は環境変数 `SMILE2P_DATA` を設定してください。
+2. データは研究室の NAS(`/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+`)にあり、NAS を読める計算機ではそのまま使えます。
+   手元にコピーした場合は環境変数 `SMILE2P_DATA` を設定してください(1_DataIO の 1 節、リポジトリ直下の README の「データの置き場所」)。
 
 チュートリアル専用の関数は使わず、実際に使うときと同じ手順で書いています。
 

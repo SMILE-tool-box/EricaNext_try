@@ -27,10 +27,14 @@
 
   | 置き換え文字 | 置き換わるもの |
   | --- | --- |
-  | `{data_top}` | 実データの置き場。`$SMILE2P_DATA`、無ければ `~/smile2p_data`、無ければ研究室サーバーの置き場(`SERVER_DIR`) |
-  | `{tpc_caldata}` | TPC だけの較正データ(2017 年の Ba-133 など)。`$SMILE2P_TPC_CALDATA`、無ければ `~/smile2p_data/TPC_caldata`、無ければサーバー |
-  | `{sim_data}` | シミュレーションのデータ(SMILE_tool_box_v2.20 の `data/` の写し)。`$SMILE2P_SIM_DATA`、無ければ `~/smile2p_sim_data` |
+  | `{data_top}` | 実データと較正ファイル: `<データ>/calibration_data` |
+  | `{tpc_caldata}` | TPC だけの較正データ(2017 年の Ba-133 など): `<データ>/TPC_caldata` |
+  | `{sim_data}` | シミュレーションのデータ(SMILE_tool_box_v2.20 の `data/` と `emulator_param/`): `<データ>/simulation_data/parameters/smile2p_sim_data` |
+  | `{parma_flux}` | PARMA の宇宙線のフラックスのファイル(シミュレーションの設定ファイルだけ): `<データ>/simulation_data/parma_flux` |
   | `{home}` | ホームディレクトリ |
+
+  `<データ>` は環境変数 `SMILE2P_DATA`、無ければ研究室の NAS の `/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+`(`ericanext_config.py` の `DATA_DIR`)です。
+  中の並びはリポジトリ直下の README の「データの置き場所」にあります。
 
 - 実際に使われる値(置き換え後、コメントを除いたもの)は、次で確かめられます。
 
@@ -52,12 +56,12 @@
   "chain": ["ReadData", "CalcFADC", "TPC_Calibration", "HA_CenterGravity", "HA_Calc", "TOT_Skewness", "Reconstruct"],
   "parameters": {
     "ReadData": {
-      "data_dir": "{data_top}/Per02_ETCC",
+      "data_dir": "{data_top}/sm2+_cal_rawdata/20190701_Per02",
       "reverse_TPC": false,
       "_doc": {"data_dir": "生データ(*.raw)のディレクトリ", "reverse_TPC": "..."}
     },
     "TOT_Skewness": {
-      "drift_velocity_file": "{data_top}/Per02_ETCC/drift_velocity.dat",
+      "drift_velocity_file": "{data_top}/sm2+_cal_rawdata/20190701_Per02/drift_velocity.dat",
       "_doc": {"drift_velocity_file": "ドリフト速度のファイル(1 行目 offset [clock]、以降 時間 [hour] と速度 [mm/clock])"}
     }
   }

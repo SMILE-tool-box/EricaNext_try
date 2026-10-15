@@ -3,8 +3,8 @@
     "SMILE-2+ 20190701 Per02 ground-calibration run.",
     "Values follow the SMILE_tool_box_v2.20 reference run",
     "(sm2+_cal_rootdata/20190701_Per02/setting.mac and HabocStatus.scl).",
-    "{data_top} is replaced by the data directory: $SMILE2P_DATA, else ~/smile2p_data, else the server directory.",
-    "Place the data as <data_top>/Per02_ETCC and <data_top>/param/20190528 and nothing here needs editing.",
+    "{data_top} is replaced by <data>/calibration_data, <data> = $SMILE2P_DATA, else the NAS directory (config/ericanext_config.py DATA_DIR).",
+    "The data are <data_top>/sm2+_cal_rawdata/20190701_Per02 and <data_top>/param/20190528 (layout of the NAS).",
     "Otherwise edit these paths (absolute paths are fine): ReadData.data_dir, TPC_Calibration.ParameterFile,",
     "HA_Calc.parameter_dir, HA_Calc.Modified_Parameter_Data_Dir, TOT_Skewness.drift_velocity_file. See README.md."
   ],
@@ -24,7 +24,7 @@
   ],
   "parameters": {
     "ReadData": {
-      "data_dir": "{data_top}/Per02_ETCC",
+      "data_dir": "{data_top}/sm2+_cal_rawdata/20190701_Per02",
       "reverse_TPC": true,
       "_doc": {
         "data_dir": "生データ(*.raw)のディレクトリ",
@@ -91,7 +91,7 @@
     },
     "TOT_Skewness": {
       "_note": "[TOT_Skewness_Analysis] Drift_Velocity_file : Per02_ETCC/drift_velocity.dat",
-      "drift_velocity_file": "{data_top}/Per02_ETCC/drift_velocity.dat",
+      "drift_velocity_file": "{data_top}/sm2+_cal_rawdata/20190701_Per02/drift_velocity.dat",
       "_doc": {
         "drift_velocity_file": "ドリフト速度のファイル(1 行目 offset [clock]、以降 時間 [hour] と速度 [mm/clock])"
       }

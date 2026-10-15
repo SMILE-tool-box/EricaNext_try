@@ -464,3 +464,21 @@ SMILE_tool_box と同じ振る舞いなので今は直さないが、SMILE-3 で
 | 項目 | 中身 | 見つけた日 |
 | --- | --- | --- |
 | 再構成の `Ke` が真の値より小さい | シミュレーションの raw を再構成すると `Ke / E_tpc` の中央値が約 0.8(d10 の熱中性子、err_flag == 0 の 48 イベント)。分解能による広がりではなく偏り。読み出し範囲の外へのもれではない。TPC の応答(電離、増幅、閾値)と較正(`TPC_Calibration`)のどこで小さくなるかを調べる | 2026-10-14 |
+
+## 2026-10-15 データの置き場所を NAS にまとめた
+
+- 小野田が EricaNext_try に要るデータを NAS の `/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+` にまとめた
+  (`calibration_data/sm2+_cal_rawdata/20190701_Per0x`, `calibration_data/param/20190528`, `TPC_caldata/`, `simulation_data/parameters/smile2p_sim_data/`)。
+- `config/ericanext_config.py`: 根元を `DATA_DIR`(NAS)、環境変数 `SMILE2P_DATA` で変えられるようにし、`{data_top}` = `<根元>/calibration_data`、
+  `{tpc_caldata}` = `<根元>/TPC_caldata`、`{sim_data}` = `<根元>/simulation_data/parameters/smile2p_sim_data` にした。
+  前の `~/smile2p_data`、`~/smile2p_sim_data`、研究室サーバーへの切り替えと、`SMILE2P_TPC_CALDATA`, `SMILE2P_SIM_DATA` はやめた
+  (`setup_sim.sh` の `export SMILE2P_SIM_DATA` も削除)。
+- 設定ファイルの生データの場所を `{data_top}/sm2+_cal_rawdata/20190701_Per02` などに変更。全設定ファイルのパスが NAS にあることを確認。
+- 確認: NAS から Per02 の先頭 2000 イベントを再構成した `single_hit` は、前の出力と同じ(Eg, Ke, Len_TRA, err_flag)。
+  NAS のデータで回したシミュレーション(seed 1、2 万個)の `edep` は前の出力と同じ。
+- PARMA のフラックス(`source.flux_file`)は NAS に無いので、まだ `hikaru3_analysis2/BGsim` を指している。
+- ついでに見つけた問題: `EdepPickUp` の出力先のディレクトリが無いと、`edep.root` が作られないまま終了コード 0 で終わっていた。
+  ディレクトリを作り、開けなければ `AS_QUIT_ERROR`(終了コード 1)にした。
+- 小野田が PARMA のフラックス(熱中性子、深さ 3〜100 g/cm²)を NAS の `simulation_data/parma_flux/` に置いた(d10 は元と md5 一致)。
+  置き換え文字 `{parma_flux}`(= `<根元>/simulation_data/parma_flux`)を足し、`source.flux_file` を `{parma_flux}/parma_flux_d10_g10_thermal.root` にした。
+  NAS のフラックスで回したシミュレーション(seed 1、2 万個)の `edep` は前の出力と同じ。中性子(`neutron_g10`)のフラックスは NAS に無い。

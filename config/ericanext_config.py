@@ -5,12 +5,13 @@
     cfg["chain"]                     # module order
     cfg["parameters"]["CalcFADC"]    # {"base_window": 30.0, "threshold": 20.0}
 
-Keys starting with "_" are comments and are dropped by load(); "{data_top}"
-in strings is replaced by data_top() and "{tpc_caldata}" by tpc_caldata().
+Keys starting with "_" are comments and are dropped by load(); in strings
+"{data_top}" is replaced by data_top(), "{tpc_caldata}" by tpc_caldata() and
+"{sim_data}" by sim_data().
 
 Simulation configurations are in config/simulation/*.json (load_sim()); there
-"{sim_data}" is replaced by sim_data(), "{home}" by the home directory and
-"{data_top}" by data_top().
+"{sim_data}" is replaced by sim_data(), "{parma_flux}" by parma_flux(), "{home}" by
+the home directory and "{data_top}" by data_top().
 """
 import json
 import os
@@ -18,41 +19,39 @@ from pathlib import Path
 
 CONFIG_DIR = Path(__file__).resolve().parent
 
-# Where the data lives on the lab server (copy it with rsync, or use it in
-# place when running on the server).
-SERVER = "ramune"
-SERVER_DIR = "/home/onoda/hikaru3_analysis2/sm2+_cal_rawdata"
-# TPC-only calibration runs (Ba-133, 2017-12-19/20) for the gain map
-SERVER_TPC_CALDATA = "/home/onoda/hikaru3_analysis2/TPC_caldata"
+# The data of EricaNext_try (on the lab NAS). Layout:
+#   calibration_data/sm2+_cal_rawdata/<date>_<Period>/   raw data (uTPC_*.raw, HA*.raw) and drift_velocity.dat
+#   calibration_data/param/<date>/                        calibration files (Calibration*.dat, MDF, Cal_HA, HAs.pos, ...)
+#   TPC_caldata/<date>/<Period>_TPC/                      TPC-only calibration runs (Ba-133, 2017-12-19/20)
+#   simulation_data/parameters/smile2p_sim_data/          simulation data (SMILE_tool_box_v2.20/data + emulator_param)
+#   simulation_data/parma_flux/                           PARMA cosmic-ray flux files (parma_flux_d<depth>_g10_thermal.root)
+# To use a copy elsewhere, keep the same layout and set $SMILE2P_DATA to its top directory.
+DATA_DIR = "/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+"
+
+
+def data_root():
+    """Top of the data directory: $SMILE2P_DATA, else DATA_DIR (the NAS)."""
+    return Path(os.environ.get("SMILE2P_DATA", DATA_DIR)).expanduser()
 
 
 def data_top():
-    """Directory that holds <Period>_ETCC/ and param/.
-
-    Order: $SMILE2P_DATA, ~/smile2p_data, the server directory (when running
-    on the server).
-    """
-    env = os.environ.get("SMILE2P_DATA")
-    if env:
-        return Path(env).expanduser()
-    local = Path("~/smile2p_data").expanduser()
-    if local.is_dir() or not Path(SERVER_DIR).is_dir():
-        return local
-    return Path(SERVER_DIR)
+    """{data_top}: directory that holds sm2+_cal_rawdata/ and param/."""
+    return data_root() / "calibration_data"
 
 
 def tpc_caldata():
-    """Directory that holds the TPC-only calibration runs (<date>/<PerXX>_TPC/).
+    """{tpc_caldata}: directory of the TPC-only calibration runs (<date>/<Period>_TPC/)."""
+    return data_root() / "TPC_caldata"
 
-    Order: $SMILE2P_TPC_CALDATA, ~/smile2p_data/TPC_caldata, the server directory.
-    """
-    env = os.environ.get("SMILE2P_TPC_CALDATA")
-    if env:
-        return Path(env).expanduser()
-    local = Path("~/smile2p_data/TPC_caldata").expanduser()
-    if local.is_dir() or not Path(SERVER_TPC_CALDATA).is_dir():
-        return local
-    return Path(SERVER_TPC_CALDATA)
+
+def sim_data():
+    """{sim_data}: directory of the simulation data (SMILE_tool_box_v2.20/data and emulator_param/)."""
+    return data_root() / "simulation_data" / "parameters" / "smile2p_sim_data"
+
+
+def parma_flux():
+    """{parma_flux}: directory of the PARMA cosmic-ray flux files."""
+    return data_root() / "simulation_data" / "parma_flux"
 
 
 def available():
@@ -60,11 +59,6 @@ def available():
 
 
 SIM_CONFIG_DIR = CONFIG_DIR / "simulation"
-
-
-def sim_data():
-    """Directory of the simulation data (SMILE_tool_box_v2.20/data): $SMILE2P_SIM_DATA, else ~/smile2p_sim_data."""
-    return Path(os.environ.get("SMILE2P_SIM_DATA", "~/smile2p_sim_data")).expanduser()
 
 
 def available_sim():
@@ -101,4 +95,5 @@ def load_sim(name):
         path = SIM_CONFIG_DIR / f"{name}.json"
     with open(path) as fp:
         raw = json.load(fp)
-    return _resolve(raw, {"{sim_data}": sim_data(), "{home}": Path.home(), "{data_top}": data_top()})
+    return _resolve(raw, {"{sim_data}": sim_data(), "{parma_flux}": parma_flux(), "{home}": Path.home(),
+                          "{data_top}": data_top()})

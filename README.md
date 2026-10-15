@@ -306,45 +306,46 @@ cmake ../source/ \
 [`config/*.json`](config/) にまとめています(SMILE_tool_box の参照実行と同じ値)。値を変えるときは設定ファイルだけを直します。
 実行のしかたは上の「[使い方(まずここ)](#使い方まずここ)」、設定ファイルの書き方は [`config/README.md`](config/README.md) にあります。
 
-#### 自分の環境に合わせて変える場所
+#### データの置き場所(自分の環境に合わせて変える場所)
 
-設定ファイルのパスは `{data_top}/...` と書いてあり、`{data_top}` は実行時に次の順で探したディレクトリに置き換わります。
-
-1. 環境変数 `SMILE2P_DATA`
-2. `~/smile2p_data`(このディレクトリがあれば)
-3. 研究室サーバー上の置き場所(`config/ericanext_config.py` の `SERVER_DIR`)
-
-**データを次の形で置けば、設定ファイルは書き換えずにそのまま使えます。**
+データはリポジトリに入っていません。研究室の NAS の、EricaNext_try のデータの置き場にまとめてあります。
 
 ```
-<データの置き場>/              ← ~/smile2p_data にする、または export SMILE2P_DATA=<データの置き場>
-├── Per02_ETCC/                ← 生データ(uTPC_*.raw, HA*.raw)と drift_velocity.dat
-├── Per03_ETCC/
-└── param/20190528/            ← 較正ファイル(Calibration20190130.dat, XMDF/YMDF, Cal_HA, HAs.pos など)
+/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+/     ← config/ericanext_config.py の DATA_DIR(環境変数 SMILE2P_DATA で変えられる)
+├── calibration_data/                                 ← 設定ファイルの {data_top}
+│   ├── sm2+_cal_rawdata/20190701_Per02/              ← 生データ(uTPC_*.raw, HA*.raw)と drift_velocity.dat
+│   ├── sm2+_cal_rawdata/20190701_Per03/
+│   └── param/20190528/                               ← 較正ファイル(Calibration20190130.dat, XMDF/YMDF, Cal_HA, HAs.pos など)
+├── TPC_caldata/                                      ← {tpc_caldata}: TPC だけの較正データ(20171219/Per01_TPC など、ゲインマップ用)
+└── simulation_data/
+    ├── parameters/smile2p_sim_data/                  ← {sim_data}: シミュレーションのデータ(SMILE_tool_box_v2.20/data と emulator_param)
+    └── parma_flux/                                   ← {parma_flux}: PARMA の宇宙線のフラックス(parma_flux_d<深さ>_g10_thermal.root)
 ```
 
-```bash
-export SMILE2P_DATA=/path/to/smile2p_data    # ~/smile2p_data に置いた場合は不要
-```
+- **NAS を読める計算機では、設定ファイルを書き換えずにそのまま動きます。**
+- 手元のディスクにコピーして使う(読み込みが速くなる)ときや、別の場所に置いたときは、**同じ並び**で置いて、環境変数 `SMILE2P_DATA` にその一番上を設定します。
+  `{data_top}`, `{tpc_caldata}`, `{sim_data}`, `{parma_flux}` はすべて `SMILE2P_DATA` の下になります。
 
-置き方がこれと違う場合だけ、設定ファイル(例: `config/smile2p_20190701_Per02.json`)の次の値を自分のパスに書き換えます。
+  ```bash
+  export SMILE2P_DATA=~/EricaNext_try_data      # 中に calibration_data/, TPC_caldata/, simulation_data/
+  ```
+
+並びが違う場所に置いた場合だけ、設定ファイル(例: `config/smile2p_20190701_Per02.json`)の次の値を自分のパスに書き換えます。
 `{data_top}` を使わずに絶対パスを書いても構いません。
 
 | モジュール | キー | 中身 | 既定値 |
 | --- | --- | --- | --- |
-| `ReadData` | `data_dir` | 生データのディレクトリ | `{data_top}/Per02_ETCC` |
+| `ReadData` | `data_dir` | 生データのディレクトリ | `{data_top}/sm2+_cal_rawdata/20190701_Per02` |
 | `TPC_Calibration` | `ParameterFile` | TPC の較正ファイル | `{data_top}/param/20190528/Calibration20190130.dat` |
 | `HA_Calc` | `parameter_dir` | HA の MDF・較正値・`HAs.pos` のディレクトリ | `{data_top}/param/20190528` |
 | `HA_Calc` | `Modified_Parameter_Data_Dir` | PMT ゲイン補正(`Mean_Sigma_HA*`)のディレクトリ | `{data_top}/param/20190528` |
-| `TOT_Skewness` | `drift_velocity_file` | ドリフト速度の表 | `{data_top}/Per02_ETCC/drift_velocity.dat` |
+| `TOT_Skewness` | `drift_velocity_file` | ドリフト速度の表 | `{data_top}/sm2+_cal_rawdata/20190701_Per02/drift_velocity.dat` |
 
-- `reference` の 2 つのパス(`setting_mac`, `root`)は、SMILE_tool_box の出力との比較に使うだけで、チェーンの実行には使いません。
-- 研究室サーバー以外(別の研究室など)で使う場合は、`config/ericanext_config.py` の `SERVER`(サーバー名)と
-  `SERVER_DIR`(サーバー上の置き場所)も書き換えると、チュートリアルに表示される rsync のコマンドが正しくなります。
+- `reference` の 2 つのパス(`setting_mac`, `root`)は、SMILE_tool_box の出力との比較に使うだけで、チェーンの実行には使いません(研究室サーバーの `hikaru3_analysis2` を指しています)。
 - どのパスが使われるかは、次で確認できます。
   ```bash
   python3 -c "import sys; sys.path.insert(0, 'config'); import ericanext_config as ec, json; \
-              print(ec.data_top()); print(json.dumps(ec.load('smile2p_20190701_Per02')['parameters'], indent=1))"
+              print(ec.data_root()); print(json.dumps(ec.load('smile2p_20190701_Per02')['parameters'], indent=1))"
   ```
 
 ### Python から直接使う

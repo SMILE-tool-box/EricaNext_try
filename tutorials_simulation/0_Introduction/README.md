@@ -65,7 +65,8 @@ SMILE-3 の形状(まだ作っていない)も、GDML で作れば同じ仕組�
 
 ## 4. 必要なデータ
 
-SMILE_tool_box_v2.20 の `data/` 一式(174 MB)を使います。手元では `~/smile2p_sim_data/` に置いています(元は研究室の `SMILE_tool_box_v2.20/data/`)。
+SMILE_tool_box_v2.20 の `data/` 一式(174 MB)を使います。研究室の NAS の `/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+/simulation_data/parameters/smile2p_sim_data/`
+(設定ファイルの `{sim_data}`)に置いています(元は研究室の `SMILE_tool_box_v2.20/data/`)。
 
 | マクロのパラメータ | ファイル |
 | --- | --- |

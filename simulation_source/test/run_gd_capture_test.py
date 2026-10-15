@@ -10,8 +10,10 @@ sys.path.insert(0, os.path.join(HERE, "..", "install", "lib", "python"))
 import anlnext
 import anlgeant4
 import EricaSimPy as sim
+sys.path.insert(0, os.path.join(HERE, "..", "..", "config"))
+import ericanext_config as ec
 
-DATA = os.path.expanduser("~/smile2p_sim_data/Gd_capture")
+DATA = str(ec.sim_data() / "Gd_capture")
 gd = sys.argv[1] == "on"
 n = int(sys.argv[2]) if len(sys.argv) > 2 else 2000
 out = sys.argv[3] if len(sys.argv) > 3 else os.path.join(HERE, f"gd_capture_test_{sys.argv[1]}.root")

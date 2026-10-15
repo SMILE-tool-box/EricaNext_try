@@ -61,7 +61,7 @@
     "module": "ParmaCRPrimaryGen",
     "parameters": {
       "particle": "neutron",
-      "flux_file": "/home/onoda/hikaru3_analysis2/BGsim/thermal_neutron_g10/parma_flux/parma_flux_d10_g10_thermal.root",
+      "flux_file": "{parma_flux}/parma_flux_d10_g10_thermal.root",
       "_plane": "plane_size / plane_distance are in cm (anlgeant4 length unit): 300 cm = 3000 mm = sim.mac ParaSrcSize 3000, ParaSrcDistance 3000 (mm)",
       "plane_size": 300.0,
       "plane_distance": 300.0,

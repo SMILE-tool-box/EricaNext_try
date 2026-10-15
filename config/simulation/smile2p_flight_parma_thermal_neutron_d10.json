@@ -3,7 +3,7 @@
     "SMILE-2+ flight, cosmic-ray thermal neutrons (PARMA, depth 10 g/cm2, g10) - same setting as the SMILE_tool_box run",
     "hikaru3_analysis2/BGsim/thermal_neutron_g10/simulation/d10 (sim.mac, HabocStatus.scl).",
     "Run: python3 run_script/run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1",
-    "{sim_data} = $SMILE2P_SIM_DATA or ~/smile2p_sim_data (SMILE_tool_box_v2.20/data), {home} = home directory.",
+    "{sim_data} = <data>/simulation_data/parameters/smile2p_sim_data (SMILE_tool_box_v2.20/data), <data> = $SMILE2P_DATA or the NAS directory; {parma_flux} = <data>/simulation_data/parma_flux; {home} = home directory.",
     "Lengths of anlgeant4 modules are in cm. Lists of 3 numbers are 3-vectors."
   ],
   "environment": {
@@ -61,7 +61,7 @@
     "module": "ParmaCRPrimaryGen",
     "parameters": {
       "particle": "neutron",
-      "flux_file": "/home/onoda/hikaru3_analysis2/BGsim/thermal_neutron_g10/parma_flux/parma_flux_d10_g10_thermal.root",
+      "flux_file": "{parma_flux}/parma_flux_d10_g10_thermal.root",
       "_plane": "plane_size / plane_distance are in cm (anlgeant4 length unit): 300 cm = 3000 mm = sim.mac ParaSrcSize 3000, ParaSrcDistance 3000 (mm)",
       "plane_size": 300.0,
       "plane_distance": 300.0,

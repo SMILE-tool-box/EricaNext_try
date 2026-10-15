@@ -9,8 +9,10 @@ sys.path.insert(0, os.path.join(HERE, "..", "install", "lib", "python"))
 import anlnext
 import anlgeant4
 import EricaSimPy as sim
+sys.path.insert(0, os.path.join(HERE, "..", "..", "config"))
+import ericanext_config as ec
 
-SIM_DATA = os.environ.get("SMILE2P_SIM_DATA", os.path.expanduser("~/smile2p_sim_data"))
+SIM_DATA = str(ec.sim_data())
 p = argparse.ArgumentParser()
 p.add_argument("flux")
 p.add_argument("n", nargs="?", type=int, default=10000)

@@ -11,6 +11,7 @@
 #include <G4SystemOfUnits.hh>
 #include <TFile.h>
 #include <TTree.h>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -55,7 +56,15 @@ anlnext::ANLStatus EdepPickUp::mod_initialize()
     std::cout << "EdepPickUp: " << haOff_.size() << " PMTs switched off (" << haOffFile_ << ")" << std::endl;
   }
 
+  // create the output directory if needed; stop the chain when the file cannot be opened
+  const std::filesystem::path outDir = std::filesystem::path(outputFile_).parent_path();
+  std::error_code ec;
+  if (!outDir.empty()) std::filesystem::create_directories(outDir, ec);   // a failure shows up as IsZombie below
   file_ = new TFile(outputFile_.c_str(), "recreate");
+  if (file_->IsZombie()) {
+    std::cerr << "EdepPickUp: cannot open " << outputFile_ << std::endl;
+    return anlnext::AS_QUIT_ERROR;
+  }
   tree_ = new TTree("edep", "energy deposits per event (keV, mm)");
   tree_->Branch("event_id", &eventID_);
   tree_->Branch("primary_name", &primaryName_);
