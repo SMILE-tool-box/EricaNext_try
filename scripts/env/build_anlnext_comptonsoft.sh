@@ -2,15 +2,19 @@
 # Build ANLNext (with Geant4-CLHEP vectors) and ComptonSoft (anlgeant4) under ~/opt,
 # after build_geant4.sh (or with $GEANT4_INSTALL set to an existing Geant4). This one ANLNext is used for both the EricaNext data chain and the simulation.
 # /usr/local is not touched.
-#   ANLNext source:     ~/ANLNext            (github.com/odakahirokazu/ANLNext, c22eb3e)
+#   ANLNext source:     $ANLNEXT_SRC, ~/ANLNext or ~/opt/src/ANLNext (github.com/odakahirokazu/ANLNext, c22eb3e)
 #   ComptonSoft source: ~/opt/src/ComptonSoft (github.com/odakahirokazu/ComptonSoft, bbe3486)
 set -euo pipefail
 OPT=$HOME/opt; J=$(nproc)
 source $(cd "$(dirname "$0")" && pwd)/geant4_paths.sh   # $GEANT4_INSTALL, G4_CMAKE_DIR, G4_LIBDIR
 
 # --- ANLNext with ANLNEXT_USE_G4VECTOR (anlgeant4 requires vector parameters)
-[ -d $HOME/ANLNext/source ] || { git clone https://github.com/odakahirokazu/ANLNext.git $HOME/ANLNext; git -C $HOME/ANLNext checkout c22eb3e; }
-cd $HOME/ANLNext
+# source: $ANLNEXT_SRC, else ~/ANLNext if it holds the ANLNext source, else cloned to ~/opt/src/ANLNext
+if [ -z "${ANLNEXT_SRC:-}" ]; then
+  if [ -d $HOME/ANLNext/source ]; then ANLNEXT_SRC=$HOME/ANLNext; else ANLNEXT_SRC=$OPT/src/ANLNext; fi
+fi
+[ -d $ANLNEXT_SRC/source ] || { git clone https://github.com/odakahirokazu/ANLNext.git $ANLNEXT_SRC; git -C $ANLNEXT_SRC checkout c22eb3e; }
+cd $ANLNEXT_SRC
 rm -rf build-g4 && mkdir build-g4 && cd build-g4
 export LIBRARY_PATH=$G4_LIBDIR:${LIBRARY_PATH:-}   # ANLNext links G4clhep without a link dir
 cmake .. -DCMAKE_INSTALL_PREFIX=$OPT/anlnext-g4 -DANLNEXT_USE_G4VECTOR=ON \

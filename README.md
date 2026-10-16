@@ -254,6 +254,15 @@ ANLNext は 1 つ(`~/opt/anlnext-g4`)で、実データの解析(`source/`)と�
 
 ## インストール
 
+### 0. EricaNext_try を取ってくる
+
+```bash
+git clone https://github.com/haru2510/EricaNext_try.git      # SSH の鍵を登録していれば git@github.com:haru2510/EricaNext_try.git
+cd EricaNext_try
+```
+
+置く場所はどこでも構いません。以下のコマンドは、このリポジトリの一番上のディレクトリで実行します。
+
 ### 1. Geant4、ANLNext、ComptonSoft、EricaNext を入れる
 
 スクリプト 1 本で、すべて `~/opt` に入れて EricaNext_try をビルドします。`~/opt` の外(`/usr/local`、`~/.bashrc` など)は変えません。
@@ -266,7 +275,7 @@ bash scripts/env/install_all.sh
 | --- | --- | --- |
 | 1 | `scripts/env/build_geant4.sh` | Geant4 11.4.3 を `~/opt/geant4-11.4.3` に(GDML、マルチスレッド、`GEANT4_BUILD_TLS_MODEL=global-dynamic`)。物理データ(約 2 GB)は初回だけ `~/opt/geant4-data-11.4.3` にダウンロード |
 | 2 | `scripts/env/make_g4ndl_ar36fix.sh` | 中性子のデータ G4NDL4.7.1 に G4NDL4.5 の Ar-36/38 を補ったもの(`~/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix`) |
-| 3 | `scripts/env/build_anlnext_comptonsoft.sh` | ANLNext を `~/opt/anlnext-g4` に、ComptonSoft(anlgeant4 を使うため)を `~/opt/comptonsoft` に(ソースが無ければ GitHub から取ってくる) |
+| 3 | `scripts/env/build_anlnext_comptonsoft.sh` | ANLNext を `~/opt/anlnext-g4` に、ComptonSoft(anlgeant4 を使うため)を `~/opt/comptonsoft` に。ソースは `~/opt/src/ANLNext`、`~/opt/src/ComptonSoft` に GitHub から取ってくる(ANLNext は `~/ANLNext` か環境変数 `ANLNEXT_SRC` にソースがあればそれを使う) |
 | 4 | (コピー) | 環境を設定する `scripts/env/setup_ericanext.sh` を `~/opt/setup_ericanext.sh` に置く |
 | 5 | `scripts/env/build_ericanext.sh` | EricaNext_try をビルド: 実データの解析 `source/ → install/`、シミュレーション `simulation_source/ → simulation_source/install/` |
 | 6 | `scripts/env/make_jupyter_kernel.sh` | Jupyter のカーネル「EricaNext」を登録(環境変数をカーネルに書いておく。ROOT の環境もそのとき写すので、`thisroot.sh` を読んだシェルで実行する) |
