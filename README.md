@@ -314,6 +314,7 @@ GEANT4_INSTALL=/path/to/geant4 bash scripts/env/install_all.sh
 | Geant4 の cmake で xerces-c や EXPAT が見つからない | `xerces-c-devel`、`expat-devel` を入れる |
 | ANLNext の cmake で `RUBY_CONFIG_FILE_DIR-NOTFOUND` | Ruby の開発用ヘッダを入れる(`ruby-devel` など)。`/usr/include` 以外にある場合は `build_anlnext_comptonsoft.sh` の `-DRUBY_CONFIG_FILE_DIR` を直す |
 | SWIG が見つからない | `swig` を入れる |
+| ComptonSoft のビルドで `BasicModule.hh` の `help_duplication` が `use of deleted function ‘std::unique_ptr ... (const std::unique_ptr&)’` | ANLNext の版が新しすぎる(確かめたのは c22eb3e、GitHub の最新 9898a47 などでは ComptonSoft bbe3486 が GCC 11 / C++17 で通らない)。`build_anlnext_comptonsoft.sh` は `~/ANLNext` が c22eb3e でなければそれを使わずに `~/opt/src/ANLNext` に c22eb3e を取ってくるので、`install_all.sh` をもう一度実行する(手順 3 から続く) |
 | ダウンロード(Geant4、物理データ約 2 GB、G4NDL4.5、GitHub)で止まる | ネットワーク。研究室の外のサイト(github.com、cern.ch)に出られるか確かめて、もう一度実行する |
 | 書き込みに失敗する | ディスクの空き。Geant4 のビルドと物理データで数 GB〜10 GB 程度が要る |
 | `check_geant4.sh` が NG を出す(既にある Geant4) | 表示された理由(GDML、TLS のモデル、物理データ)を直すか、`GEANT4_INSTALL` を付けずに実行して `~/opt` に入れる |
