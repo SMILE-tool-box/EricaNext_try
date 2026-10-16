@@ -257,9 +257,11 @@ ANLNext は 1 つ(`~/opt/anlnext-g4`)で、実データの解析(`source/`)と�
 ### 0. EricaNext_try を取ってくる
 
 ```bash
-git clone https://github.com/haru2510/EricaNext_try.git      # SSH の鍵を登録していれば git@github.com:haru2510/EricaNext_try.git
+git clone https://github.com/SMILE-tool-box/EricaNext_try.git      # SSH の鍵を登録していれば git@github.com:SMILE-tool-box/EricaNext_try.git
 cd EricaNext_try
 ```
+
+リポジトリは GitHub の SMILE-tool-box の組織の中にあり、非公開(Private)です。clone するには、組織に招待してもらう必要があります。
 
 置く場所はどこでも構いません。以下のコマンドは、このリポジトリの一番上のディレクトリで実行します。
 
