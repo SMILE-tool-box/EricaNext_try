@@ -25,13 +25,19 @@ CONFIG_DIR = Path(__file__).resolve().parent
 #   TPC_caldata/<date>/<Period>_TPC/                      TPC-only calibration runs (Ba-133, 2017-12-19/20)
 #   simulation_data/parameters/smile2p_sim_data/          simulation data (SMILE_tool_box_v2.20/data + emulator_param)
 #   simulation_data/parma_flux/                           PARMA cosmic-ray flux files (parma_flux_d<depth>_g10_thermal.root)
-# To use a copy elsewhere, keep the same layout and set $SMILE2P_DATA to its top directory.
+# To use a copy elsewhere, keep the same layout and set $SMILE2P_DATA to the directory that holds calibration_data/ etc.
+# (= SMILE2+); the directory above it (a copy of the whole EricaNext_try_data) works too.
 DATA_DIR = "/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+"
 
 
 def data_root():
-    """Top of the data directory: $SMILE2P_DATA, else DATA_DIR (the NAS)."""
-    return Path(os.environ.get("SMILE2P_DATA", DATA_DIR)).expanduser()
+    """Top of the data directory (the one with calibration_data/ etc. directly inside, = SMILE2+ on the NAS):
+    $SMILE2P_DATA, else DATA_DIR (the NAS). If $SMILE2P_DATA has no calibration_data/ but a SMILE2+/ (a copy of the
+    whole EricaNext_try_data directory), SMILE2+/ is used."""
+    root = Path(os.environ.get("SMILE2P_DATA", DATA_DIR)).expanduser()
+    if not (root / "calibration_data").is_dir() and (root / "SMILE2+" / "calibration_data").is_dir():
+        root = root / "SMILE2+"
+    return root
 
 
 def data_top():
