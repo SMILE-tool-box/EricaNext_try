@@ -261,7 +261,7 @@ git clone https://github.com/SMILE-tool-box/EricaNext_try.git      # SSH の鍵�
 cd EricaNext_try
 ```
 
-リポジトリは GitHub の SMILE-tool-box の組織の中にあり、非公開(Private)です。clone するには、組織に招待してもらう必要があります。
+リポジトリは GitHub の SMILE-tool-box の組織の中にあります(公開)。
 
 置く場所はどこでも構いません。以下のコマンドは、このリポジトリの一番上のディレクトリで実行します。
 
