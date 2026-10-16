@@ -18,6 +18,6 @@ if [ "$($CFG --has-feature multithreading)" = yes ]; then
 else
   echo "OK  sequential build (no TLS problem)"
 fi
-missing=$($CFG --check-datasets | grep -v -i "INSTALLED" || true)
+missing=$($CFG --check-datasets | awk '$2 != "INSTALLED"')
 if [ -z "$missing" ]; then echo "OK  physics data"; else echo "NG  physics data missing (geant4-config --install-datasets):"; echo "$missing"; ok=0; fi
 [ $ok = 1 ] && echo "=> this Geant4 can be used" || { echo "=> this Geant4 cannot be used"; exit 1; }

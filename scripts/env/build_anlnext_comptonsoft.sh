@@ -13,7 +13,12 @@ source $(cd "$(dirname "$0")" && pwd)/geant4_paths.sh   # $GEANT4_INSTALL, G4_CM
 if [ -z "${ANLNEXT_SRC:-}" ]; then
   if [ -d $HOME/ANLNext/source ]; then ANLNEXT_SRC=$HOME/ANLNext; else ANLNEXT_SRC=$OPT/src/ANLNext; fi
 fi
-[ -d $ANLNEXT_SRC/source ] || { git clone https://github.com/odakahirokazu/ANLNext.git $ANLNEXT_SRC; git -C $ANLNEXT_SRC checkout c22eb3e; }
+# clone <url> <dir> <commit>: into <dir>.part first, so an interrupted clone is never used
+clone_at() {
+  rm -rf "$2.part"
+  git clone "$1" "$2.part" && git -C "$2.part" checkout -q "$3" && mv "$2.part" "$2"
+}
+[ -d $ANLNEXT_SRC/source ] || clone_at https://github.com/odakahirokazu/ANLNext.git $ANLNEXT_SRC c22eb3e
 cd $ANLNEXT_SRC
 rm -rf build-g4 && mkdir build-g4 && cd build-g4
 export LIBRARY_PATH=$G4_LIBDIR:${LIBRARY_PATH:-}   # ANLNext links G4clhep without a link dir
@@ -28,7 +33,7 @@ make -j$J && make install
 #     GDML + Python, no Qt / Ruby (other optional libraries are OFF by default).
 #     Do not pass CS_ALL_OFF: it would switch GDML off again.
 cd $OPT/src
-[ -d ComptonSoft ] || { git clone https://github.com/odakahirokazu/ComptonSoft.git; git -C ComptonSoft checkout bbe3486; }
+[ -f ComptonSoft/anlgeant4/CMakeLists.txt ] || { rm -rf ComptonSoft; clone_at https://github.com/odakahirokazu/ComptonSoft.git $OPT/src/ComptonSoft bbe3486; }
 cd ComptonSoft && rm -rf build && mkdir build && cd build
 export ANLNEXT_INSTALL=$OPT/anlnext-g4
 export LIBRARY_PATH=$OPT/anlnext-g4/lib:$G4_LIBDIR

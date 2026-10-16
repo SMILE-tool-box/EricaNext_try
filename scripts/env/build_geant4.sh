@@ -6,7 +6,8 @@ OPT=$HOME/opt; SRC=$OPT/src; J=$(nproc)
 mkdir -p $SRC
 GV=11.4.3
 cd $SRC
-[ -f geant4-v$GV.tar.gz ] || curl -sSL -o geant4-v$GV.tar.gz https://github.com/Geant4/geant4/archive/refs/tags/v$GV.tar.gz
+[ -f geant4-v$GV.tar.gz ] || { curl -sSfL -o geant4-v$GV.tar.gz.part https://github.com/Geant4/geant4/archive/refs/tags/v$GV.tar.gz \
+                                && mv geant4-v$GV.tar.gz.part geant4-v$GV.tar.gz; }
 rm -rf geant4-$GV $OPT/geant4-$GV; tar xzf geant4-v$GV.tar.gz   # physics data kept in $OPT/geant4-data-$GV
 
 echo "=== geant4 $GV"
@@ -18,3 +19,8 @@ cmake --build geant4-$GV/build -j$J
 cmake --install geant4-$GV/build
 echo "=== done"
 $OPT/geant4-$GV/bin/geant4-config --version --has-feature gdml
+# physics data: an interrupted download leaves the data directory incomplete -> download the missing datasets
+if [ -n "$($OPT/geant4-$GV/bin/geant4-config --check-datasets | awk '$2 != "INSTALLED"')" ]; then
+  echo "=== downloading missing physics data"
+  $OPT/geant4-$GV/bin/geant4-config --install-datasets
+fi

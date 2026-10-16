@@ -11,9 +11,14 @@ source $(cd "$(dirname "$0")" && pwd)/geant4_paths.sh
 NDL=$(geant4-config --datasets | awk '$2 == "G4NEUTRONHPDATA" {print $3}')
 EXTRA=$OPT/geant4-data-extra
 mkdir -p $EXTRA && cd $EXTRA
-if [ ! -d G4NDL4.5 ]; then
-  curl -sSfL -o G4NDL.4.5.tar.gz https://cern.ch/geant4-data/datasets/G4NDL.4.5.tar.gz
-  tar xzf G4NDL.4.5.tar.gz && rm G4NDL.4.5.tar.gz
+# G4NDL4.5 (only its Ar-36/38 files are used: 30 files). Downloaded and unpacked under *.part names first,
+# so an interrupted download is never mistaken for a complete one.
+N_AR=30
+if [ "$(find G4NDL4.5 -name '18_3[68]_Argon*' 2>/dev/null | wc -l)" -lt $N_AR ]; then
+  rm -rf G4NDL4.5 G4NDL4.5.part G4NDL.4.5.tar.gz.part
+  curl -sSfL -o G4NDL.4.5.tar.gz.part https://cern.ch/geant4-data/datasets/G4NDL.4.5.tar.gz
+  mkdir G4NDL4.5.part && tar xzf G4NDL.4.5.tar.gz.part -C G4NDL4.5.part
+  mv G4NDL4.5.part/G4NDL4.5 G4NDL4.5 && rmdir G4NDL4.5.part && rm G4NDL.4.5.tar.gz.part
 fi
 OUT=$(basename $NDL)_Ar36fix     # G4NDL4.7.1_Ar36fix for Geant4 11.4.3
 rm -rf $OUT
@@ -24,4 +29,6 @@ find . \( -name "18_36_Argon*" -o -name "18_38_Argon*" \) | while read -r f; do
   [ -e "$t" ] && continue       # this G4NDL already has the file
   mkdir -p "$(dirname "$t")" && cp -p "$f" "$t"
 done
-echo "added $(find ../$OUT -name '18_3[68]_Argon*' | wc -l) Ar-36/38 files to $EXTRA/$OUT"
+n=$(find ../$OUT -name '18_3[68]_Argon*' | wc -l)
+[ $n -ge $N_AR ] || { echo "make_g4ndl_ar36fix.sh: only $n Ar-36/38 files in $EXTRA/$OUT (expected $N_AR)"; exit 1; }
+echo "added the Ar-36/38 files of G4NDL4.5 to $EXTRA/$OUT ($n files)"

@@ -232,7 +232,7 @@ flowchart TD
 | --- | --- | --- |
 | [ROOT](https://root.cern/) | 6.36 で確認 | 各自(この環境では `/usr/local/root`、`thisroot.sh` を `~/.bashrc` で読む) |
 | [Boost](https://www.boost.org/) | 1.80.0 以降 | 各自 |
-| CMake | 3.20 以降 | システム |
+| CMake | **3.30 以降** | システム(ANLNext と ComptonSoft の `cmake_minimum_required` が 3.30。この環境は 3.30.5) |
 | C++ コンパイラ | C++17 | システム |
 | [SWIG](https://www.swig.org/) | | システム(Python 拡張の生成に必須) |
 | Python 3 | 3.9 で確認 | システム(`/usr/bin/python3`) |
@@ -293,6 +293,30 @@ GEANT4_INSTALL=/path/to/geant4 bash scripts/env/install_all.sh
 
 `check_geant4.sh` が、GDML が有効か、マルチスレッドのときに TLS のモデルが `global-dynamic` か(でないと Python から Geant4 を読み込めない)、
 物理データがそろっているか、版(確かめたのは 11.4.3)を調べ、使えなければ理由を表示して止まります。その Geant4 自体は変えません。
+
+#### 途中で失敗したとき
+
+`install_all.sh` は、どこかで 1 つでもコマンドが失敗するとそこで止まり、どの手順で失敗したかを表示します。
+
+- **原因を直して、もう一度 `bash scripts/env/install_all.sh` を実行すれば、失敗した手順から続けます。** 終わった手順には印(`~/opt/.ericanext_install/step<n>.done`)を付けていて、飛ばします。
+- ある手順からやり直したいとき(例: ANLNext を入れ直す)は `bash scripts/env/install_all.sh --from 3` のように番号を付けます。その手順と後ろの手順の印を消してから実行します。
+- 出力は `~/opt/logs/install_<日時>.log` にも残ります。失敗の原因はここで見られます。
+- 既にある Geant4 を使う場合(`GEANT4_INSTALL`)、その場所は最初の実行のときに記録するので、2 回目からは付けなくても同じ Geant4 を使います。
+- ダウンロードと clone は、途中で切れても壊れたまま使わないようにしています。Geant4 のソースと G4NDL4.5 は `*.part` の名前で取ってきてから名前を変え、
+  GitHub からの clone も `*.part` に取ってから名前を変えます。Geant4 の物理データは、入れた後に `geant4-config --check-datasets` で確かめ、足りなければ取り直します。
+  G4NDL に補った Ar-36/38 のファイルの数(30)も確かめます。
+
+よくある失敗の原因:
+
+| 症状 | 原因と直し方 |
+| --- | --- |
+| ANLNext や ComptonSoft の cmake で `CMake 3.30 or higher is required` | CMake が古い。3.30 以降を入れる(例 `pip install --user cmake`) |
+| Geant4 の cmake で xerces-c や EXPAT が見つからない | `xerces-c-devel`、`expat-devel` を入れる |
+| ANLNext の cmake で `RUBY_CONFIG_FILE_DIR-NOTFOUND` | Ruby の開発用ヘッダを入れる(`ruby-devel` など)。`/usr/include` 以外にある場合は `build_anlnext_comptonsoft.sh` の `-DRUBY_CONFIG_FILE_DIR` を直す |
+| SWIG が見つからない | `swig` を入れる |
+| ダウンロード(Geant4、物理データ約 2 GB、G4NDL4.5、GitHub)で止まる | ネットワーク。研究室の外のサイト(github.com、cern.ch)に出られるか確かめて、もう一度実行する |
+| 書き込みに失敗する | ディスクの空き。Geant4 のビルドと物理データで数 GB〜10 GB 程度が要る |
+| `check_geant4.sh` が NG を出す(既にある Geant4) | 表示された理由(GDML、TLS のモデル、物理データ)を直すか、`GEANT4_INSTALL` を付けずに実行して `~/opt` に入れる |
 
 ### 2. 環境を設定する
 
