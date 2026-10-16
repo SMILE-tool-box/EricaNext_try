@@ -27,11 +27,11 @@ python3 run_chain.py smile2p_20190701_Per02 -o per02_out.root               # �
 python3 run_chain.py smile2p_20190701_Per02 -o test.root -n 10000           # 先頭 1 万イベント
 python3 run_chain.py smile2p_20190701_Per02 -o raw.root --raw --compression 505   # 同期した生データのツリー
 
-# シミュレーション(先に source ~/opt/setup_sim.sh)
+# シミュレーション
 python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o edep.root --seed 1
 python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10_raw -n 1000000 -o edep.root --seed 1 --raw-dir rawdata
 
-# シミュレーションの raw を再構成する(上の rawdata を読む。新しいシェルで。setup_sim.sh は不要)
+# シミュレーションの raw を再構成する(上の rawdata を読む)
 python3 run_chain.py smile2p_sim_d10_recon -o sim_recon.root --set ReadData.data_dir=rawdata
 ```
 
@@ -227,72 +227,96 @@ flowchart TD
 
 ## 依存関係
 
-- [ANLnext](https://github.com/odakahirokazu/ANLNext)
-- [ROOT](https://root.cern/)
-- [Boost](https://www.boost.org/) 1.80.0 以降
-- CMake 3.8 以降
-- C++ コンパイラ（C++17 対応）
-- [SWIG](https://www.swig.org/)（Python 拡張の生成に必須）
-- Python 3
+| ソフト | 版 | 入れ方 |
+| --- | --- | --- |
+| [ROOT](https://root.cern/) | 6.36 で確認 | 各自(この環境では `/usr/local/root`、`thisroot.sh` を `~/.bashrc` で読む) |
+| [Boost](https://www.boost.org/) | 1.80.0 以降 | 各自 |
+| CMake | 3.20 以降 | システム |
+| C++ コンパイラ | C++17 | システム |
+| [SWIG](https://www.swig.org/) | | システム(Python 拡張の生成に必須) |
+| Python 3 | 3.9 で確認 | システム(`/usr/bin/python3`) |
+| Ruby の開発用ヘッダ、readline | | システム(ANLNext が Ruby の拡張をいつも作るため) |
+| xerces-c、expat | | システム(Geant4 の GDML 用。例 `sudo dnf install xerces-c-devel expat-devel`) |
+| [Geant4](https://geant4.web.cern.ch/) | 11.4.3 | 下の `install_all.sh` が `~/opt` に入れる |
+| [ANLNext](https://github.com/odakahirokazu/ANLNext) | c22eb3e | 同上(ベクトル型のパラメータ有効) |
+| [ComptonSoft](https://github.com/odakahirokazu/ComptonSoft)(anlgeant4) | bbe3486 | 同上 |
 
-### 環境変数
-
-ビルド前に、以下の環境変数を設定しておきます（各自の環境に合わせる）。
-
-| 環境変数 | 説明 |
-| --- | --- |
-| `ANLNEXT_INSTALL` | ANLnext のインストール先。未設定の場合は `$HOME` が使われる。 |
+ANLNext は 1 つ(`~/opt/anlnext-g4`)で、実データの解析(`source/`)とシミュレーション(`simulation_source/`)の両方で使います。
+シミュレーションの anlgeant4 がベクトル型のパラメータ(`ANLNEXT_USE_G4VECTOR=ON`)を必要とするのでそのようにビルドしています。
+実データの解析もこの ANLNext で、普通にビルドした ANLNext のときとビット単位で同じ結果になります。
 
 ---
 
 ## インストール
 
-### 1. ANLnext のインストール
+### 1. Geant4、ANLNext、ComptonSoft、EricaNext を入れる
 
-先に ANLnext をインストールしておきます。
-（インストール手順は ANLnext のドキュメントを参照してください。）
-
-### 2. EricaNext のビルド
-
-リポジトリのルートディレクトリで、以下を実行します。
+スクリプト 1 本で、すべて `~/opt` に入れて EricaNext_try をビルドします(`/usr/local` は変えない)。
 
 ```bash
-mkdir build install
-cd build
-cmake ../source/ \
-  -DCMAKE_INSTALL_PREFIX=../install \
-  -DUSE_PYTHON=ON
-make -j8
-make install
+bash scripts/env/install_all.sh
 ```
 
-> **メモ:** `USE_PYTHON` は `source/CMakeLists.txt` 内で既に `ON` に設定されているため、
-> `-DUSE_PYTHON=ON` の指定は実際には省略可能です（明示のために残しています）。
+| 順 | スクリプト | すること |
+| --- | --- | --- |
+| 1 | `scripts/env/build_geant4.sh` | Geant4 11.4.3 を `~/opt/geant4-11.4.3` に(GDML、マルチスレッド、`GEANT4_BUILD_TLS_MODEL=global-dynamic`)。物理データ(約 2 GB)は初回だけ `~/opt/geant4-data-11.4.3` にダウンロード |
+| 2 | `scripts/env/make_g4ndl_ar36fix.sh` | 中性子のデータ G4NDL4.7.1 に G4NDL4.5 の Ar-36/38 を補ったもの(`~/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix`) |
+| 3 | `scripts/env/build_anlnext_comptonsoft.sh` | ANLNext を `~/opt/anlnext-g4` に、ComptonSoft を `~/opt/comptonsoft` に(ソースが無ければ GitHub から取ってくる) |
+| 4 | (コピー) | 環境を設定する `scripts/env/setup_ericanext.sh` を `~/opt/setup_ericanext.sh` に置く |
+| 5 | `scripts/env/build_ericanext.sh` | EricaNext_try をビルド: 実データの解析 `source/ → install/`、シミュレーション `simulation_source/ → simulation_source/install/` |
 
----
+コードを直したあとに EricaNext_try だけをビルドし直すときは、5 だけを実行します(`bash scripts/env/build_ericanext.sh`)。
 
-## 環境依存の設定（各自の環境に合わせて変更してください）
+### 2. 環境を設定する
 
-上記コマンドのうち、以下のオプションは **実行環境ごとに変わります**。
-自分の環境に合わせて書き換えてください。
-
-| オプション | 説明 | 
-| --- | --- | 
-| `-DCMAKE_INSTALL_PREFIX=../install` | インストール先のディレクトリ。任意の場所に変更可。未指定時は `$HOME` にインストールされる。 | 
-| `-DUSE_PYTHON=ON` | Python 拡張のビルド。ソース側で既定 `ON`。 | 
-| `make -j8` | ビルドの並列数。`8` は使用するコア数に合わせて変更。 | 
-
-### Python インタプリタを明示指定したい場合
-
-`CreateSwigPython.cmake` は `find_package(Python3 REQUIRED COMPONENTS Interpreter Development)`
-を使うため、複数の Python（conda / pyenv / system など）が混在する環境で使用する
-Python を固定したい場合は、`Python3_EXECUTABLE` にパスを渡します(ANLnext install時も)。
+`~/.bashrc` に次の 1 行を書きます(ROOT の `thisroot.sh` の後)。ターミナルでも Jupyter でも、この環境で動きます。
 
 ```bash
-cmake ../source/ \
-  -DCMAKE_INSTALL_PREFIX=../install \
-  -DPython3_EXECUTABLE=$(which python3)
+source ~/opt/setup_ericanext.sh
 ```
+
+`setup_ericanext.sh` は、Geant4 の環境、`ANLNEXT_INSTALL=~/opt/anlnext-g4`、ComptonSoft の場所、`LD_LIBRARY_PATH`、`PYTHONPATH`、
+中性子のデータ(`G4NEUTRONHPDATA`)を設定します。ANLNext は `import anlnext` だけでも Geant4 のライブラリ(`libG4clhep.so`)を使うので、
+実データの解析にもこの環境が要ります。**Jupyter や VS Code は、`~/.bashrc` を書き換えた後に起動し直してください。**
+
+確認:
+
+```bash
+python3 -c "import anlnext, anlgeant4; print(anlnext.__file__)"     # ~/opt/anlnext-g4/lib/python/anlnext/__init__.py
+```
+
+### ANLNext のビルドのオプション
+
+`build_anlnext_comptonsoft.sh` が使っている指定です。
+
+| 指定 | 意味 |
+| --- | --- |
+| `-DCMAKE_INSTALL_PREFIX=~/opt/anlnext-g4` | インストール先(既定は `$HOME`) |
+| `-DANLNEXT_USE_G4VECTOR=ON` | パラメータに Geant4 の CLHEP のベクトル型を使う(anlgeant4 に必須。既定 OFF) |
+| `-DGeant4_DIR=~/opt/geant4-11.4.3/lib64/cmake/Geant4` と環境変数 `LIBRARY_PATH` に Geant4 の `lib64` | `G4clhep` にリンクするため(ANLNext はリンク先のディレクトリを指定しない) |
+| `-DRUBY_CONFIG_FILE_DIR=/usr/include` | Ruby の設定のヘッダの場所(見つからないと cmake が止まる環境がある) |
+| `-DPython3_EXECUTABLE=/usr/bin/python3` | Python 拡張を作る Python(実行する Python と同じにする) |
+| `-DCMAKE_INSTALL_RPATH=...` | 実行時に ANLNext と Geant4 のライブラリを見つけるため |
+
+ほかのオプション(`ANLNEXT_USE_READLINE`, `ANLNEXT_ENABLE_INTERACTIVE_MODE`, `ANLNEXT_INSTALL_HEADERS`, `ANLNEXT_INSTALL_CMAKE_FILES`、どれも既定 ON)は既定のままです。
+`ANLNEXT_INSTALL_HEADERS` と `ANLNEXT_INSTALL_CMAKE_FILES` は EricaNext のビルド(ヘッダ、SWIG の cmake のモジュール)に必要なので OFF にしないでください。
+
+### EricaNext のビルドの指定
+
+`build_ericanext.sh` が使っている指定です。手で実行するときも同じです。
+
+```bash
+mkdir build install && cd build
+cmake ../source -DCMAKE_INSTALL_PREFIX=../install -DANLNEXT_INSTALL=$ANLNEXT_INSTALL -DPython3_EXECUTABLE=/usr/bin/python3
+make -j8 && make install
+```
+
+| オプション | 説明 |
+| --- | --- |
+| `-DCMAKE_INSTALL_PREFIX=../install` | インストール先。`run_script/*.py` はリポジトリの `install/lib/python` を読むので、この場所のままにする |
+| `-DANLNEXT_INSTALL=...` | ANLNext の場所(未指定なら環境変数 `ANLNEXT_INSTALL`、それも無ければ `$HOME`) |
+| `-DPython3_EXECUTABLE=...` | Python が何種類も入っている環境(conda / pyenv / system など)で、使う Python を固定する(`CreateSwigPython.cmake` は `find_package(Python3 ...)` を使う) |
+| `make -j8` | ビルドの並列数。使うコア数に合わせて変える |
 
 ---
 

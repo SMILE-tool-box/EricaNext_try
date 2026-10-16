@@ -104,7 +104,7 @@ a.run(n_events)
 設定ファイルの書き方は [`config/README.md`](../config/README.md) にあります。
 
 ```bash
-source ~/opt/setup_sim.sh          # Geant4 とシミュレーション用の ANLNext(毎回、最初に 1 回)
+# 環境(Geant4、ANLNext、ComptonSoft)は ~/.bashrc で読み込む ~/opt/setup_ericanext.sh が設定する
 cd EricaNext_try/run_script
 python3 run_sim.py <設定名> -n <一次粒子の数> [-o <出力ファイル>] [--seed <種>] [--raw-dir <ディレクトリ>] [--set 節.キー=値 ...]
 ```
@@ -135,7 +135,7 @@ cp ../config/simulation/smile2p_flight_parma_thermal_neutron_d10.json ~/my_sim.j
 python3 run_sim.py ~/my_sim.json -n 1000 -o test.root
 ```
 
-raw ファイルの再構成は `run_chain.py` で行います(`setup_sim.sh` を読んでいない新しいシェルで)。
+raw ファイルの再構成は `run_chain.py` で行います。
 
 ```bash
 python3 run_chain.py smile2p_sim_d10_recon -o sim_recon.root --set ReadData.data_dir=rawdata

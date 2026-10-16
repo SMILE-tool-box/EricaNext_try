@@ -2,7 +2,7 @@
 (25 meV) start at the centre of a 1 m GSO cube, which absorbs nearly all of the capture
 gammas. With gd_physics the summed energy peaks at the ggarnet totals (Gd-157 7.87 MeV,
 Gd-155 8.46 MeV); without it at the Geant4 ENDF / Q-values (7.94, 8.54 MeV).
-Run after `source ~/opt/setup_sim.sh`:
+Run after `source ~/opt/setup_ericanext.sh`:
     python3 run_gd_capture_test.py <on|off> [n_events] [output.root]"""
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))

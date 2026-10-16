@@ -1,7 +1,7 @@
 """Cosmic-ray background on the SMILE-2+ flight geometry, as the reference run
 hikaru3_analysis2/BGsim/thermal_neutron_g10/simulation (sim.mac: SourceType CR,
 GeometryType flight, GdPhysics 1, ParaSrcSize 3000, ParaSrcDistance 3000, HA_OFF.dat).
-Run after `source ~/opt/setup_sim.sh`:
+Run after `source ~/opt/setup_ericanext.sh`:
     python3 run_smile2p_parma_cr.py <flux.root> [n_events] [--particle neutron] [--seed 1] [-o out.root]"""
 import argparse, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))

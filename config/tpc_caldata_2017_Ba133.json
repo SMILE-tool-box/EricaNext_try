@@ -3,7 +3,7 @@
     "TPC-only calibration runs with a Ba-133 source (2017-12-19/20), for the TPC gain map",
     "(tutorials_caldata/4_MakeCalibration/GainMap.ipynb; method of Calamity_v5.0).",
     "{tpc_caldata} is replaced by <data>/TPC_caldata, <data> = $SMILE2P_DATA, else the NAS directory (config/ericanext_config.py DATA_DIR).",
-    "The runs are <tpc_caldata>/20171219/Per01_TPC etc.",
+    "The runs are <tpc_caldata>/20171219/Per08_TPC etc.",
     "Each run is processed separately with --set ReadData.data_dir={tpc_caldata}/<run>."
   ],
   "source": "Ba133",
@@ -12,8 +12,7 @@
     8.04
   ],
   "runs": [
-    "20171219/Per01_TPC",
-    "20171219/Per08_TPC",
+        "20171219/Per08_TPC",
     "20171219/Per09_TPC",
     "20171219/Per10_TPC",
     "20171219/Per12_TPC",
@@ -67,5 +66,5 @@
       }
     }
   },
-  "_runs": "each run irradiates one anode board x one cathode board (empty 0-byte files for the others), except 20171219/Per01 and 20171220/Per06 (all boards)"
+  "_runs": "each run irradiates one anode board x one cathode board (empty 0-byte files for the others), except 20171220/Per06 and Per07 (all boards). 20171219/Per01 (all boards) is not used (onoda, 2026-10-16; removed from the data directory)"
 }

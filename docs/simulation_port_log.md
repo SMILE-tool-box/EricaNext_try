@@ -482,3 +482,17 @@ SMILE_tool_box と同じ振る舞いなので今は直さないが、SMILE-3 で
 - 小野田が PARMA のフラックス(熱中性子、深さ 3〜100 g/cm²)を NAS の `simulation_data/parma_flux/` に置いた(d10 は元と md5 一致)。
   置き換え文字 `{parma_flux}`(= `<根元>/simulation_data/parma_flux`)を足し、`source.flux_file` を `{parma_flux}/parma_flux_d10_g10_thermal.root` にした。
   NAS のフラックスで回したシミュレーション(seed 1、2 万個)の `edep` は前の出力と同じ。中性子(`neutron_g10`)のフラックスは NAS に無い。
+
+## 2026-10-16 ANLNext を 1 つにまとめた
+
+- 実データの EricaNext(`source/`)を `~/opt/anlnext-g4`(`ANLNEXT_USE_G4VECTOR=ON`)に対してビルドすると、Per02 の先頭 5000 イベントの `single_hit` は
+  `/usr/local` の ANLNext のときと 28 列すべてビット単位で同じ(NaN もビットで比較)。→ ANLNext を 1 つにした(小野田の判断)。
+- `scripts/sim_env/` → `scripts/env/`。`setup_sim.sh` → `setup_ericanext.sh`(実データとシミュレーションで共通、`~/opt` に置く)。
+  `install_all.sh`(Geant4 → G4NDL の修正 → ANLNext と ComptonSoft → 環境 → EricaNext)と `build_ericanext.sh`(EricaNext の 2 つのビルド)を追加。
+  `build_geant4.sh` はデータが無ければダウンロード、`build_anlnext_comptonsoft.sh` はソースが無ければ GitHub から取る(c22eb3e / bbe3486)。
+- `~/.bashrc` の `/usr/local` の ANLNext の 4 行(`ANLNEXT_INSTALL`, `RUBYLIB`, `LD_LIBRARY_PATH`, `PYTHONPATH`)を `source ~/opt/setup_ericanext.sh` に置き換え。
+  `~/opt/setup_sim.sh` は新しいファイルを読むだけの互換用に残した。`/usr/local` の ANLNext は消していない。
+- ANLNext は `import anlnext` だけで `libG4clhep.so` を使い、RPATH に Geant4 の場所が無いので、実データの解析にも `setup_ericanext.sh` の環境が要る。
+- 新しい環境で、実データ(Per02)とシミュレーション(seed 1、2 万個)が前と同じ出力。全チュートリアル(24 冊)を実行し直してすべて完了。
+- 別件: 10 月 12 日に作ったチュートリアル用の `cache/Per02_50000.root` と今のビルドの出力が `Ve_TRA`, `Ve_TRA_fit_status`, `Ve_TRA_grad_err` で
+  わずかに違う(grad_err の相対差 10⁻⁷ 程度、fit_status 4 → 0 が 6 行)。ANLNext とは無関係(`/usr/local` のビルドでも同じ)。原因は未調査。

@@ -1,5 +1,5 @@
 """Smoke test of the simulation stack: Cs-137 (662 keV) point source at
-(0, 0, -1626) mm on the simple test geometry. Run after `source ~/opt/setup_sim.sh`."""
+(0, 0, -1626) mm on the simple test geometry. Run after `source ~/opt/setup_ericanext.sh`."""
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "install", "lib", "python"))

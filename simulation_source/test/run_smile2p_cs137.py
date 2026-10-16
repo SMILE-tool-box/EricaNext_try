@@ -1,6 +1,6 @@
 """Cs-137 (662 keV) point source at (0, 0, -1626) mm on the SMILE-2+ geometry
 (SMILE_2p_Geo, ground). Optionally writes the geometry to GDML.
-Run after `source ~/opt/setup_sim.sh`:  python3 run_smile2p_cs137.py [n_events] [--gdml out.gdml]"""
+Run after `source ~/opt/setup_ericanext.sh`:  python3 run_smile2p_cs137.py [n_events] [--gdml out.gdml]"""
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "install", "lib", "python"))

@@ -126,7 +126,7 @@
 
 | パラメータ | 値 | 中身 |
 | --- | --- | --- |
-| `environment.G4NEUTRONHPDATA` | `{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix`(既定) | G4NDL4.7.1(JEFF-3.3)に G4NDL4.5 の Ar-36/38 を補ったもの(`scripts/sim_env/make_g4ndl_ar36fix.sh`)。素の 4.7.1 は Ar-36 を Ar-37 のデータで扱い、Ar のガスに偽の (n,α) が入る |
+| `environment.G4NEUTRONHPDATA` | `{home}/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix`(既定) | G4NDL4.7.1(JEFF-3.3)に G4NDL4.5 の Ar-36/38 を補ったもの(`scripts/env/make_g4ndl_ar36fix.sh`)。素の 4.7.1 は Ar-36 を Ar-37 のデータで扱い、Ar のガスに偽の (n,α) が入る |
 | | `{home}/opt/geant4-data-extra/G4NDL4.5` | SMILE_tool_box(Geant4 10.4)と同じ ENDF/B-VII.1 |
 | `physics.em_msc` | `gs`(既定) | Geant4 11 の `G4EmLivermorePhysics`(e± の多重散乱は Goudsmit-Saunderson) |
 | | `urban` | e± の多重散乱だけ SMILE_tool_box(Geant4 10.4)と同じ Urban(RangeFactor 0.02 など) |

@@ -22,7 +22,8 @@
 | [`3_Backprojection/`](3_Backprojection/Backprojection.ipynb) | 較正データのバックプロジェクション像 |
 | `4_MakeCalibration/` | 較正ファイルを作る(全イベントの生データツリーから) |
 | ├ [`DriftVelocity`](4_MakeCalibration/DriftVelocity.ipynb) | ドリフト速度と offset(`drift_velocity.dat`)。研究室のマクロ `drift_speed_s2p_v3.C` と同じ手順 |
-| ├ [`GainMap`](4_MakeCalibration/GainMap.ipynb) | TPC のゲインマップ(`Calibration*.dat`、$K_a$, $K_b$)。Ba-133 の較正データ(2017-12-19/20、12 run)の 1 ヒットのスペクトルの 30.85 / 8.04 keV のピークにガウス関数を当てて作る |
+| ├ [`GainMap`](4_MakeCalibration/GainMap.ipynb) | TPC のゲインマップ(`Calibration*.dat`、$K_a$, $K_b$)。Ba-133 の較正データ(2017-12-19/20、11 run。20171219/Per01 は使わない)の 1 ヒットのスペクトルの 30.85 / 8.04 keV のピークにガウス関数を当てて作る |
+| ├ [`GainMap_Board`](4_MakeCalibration/GainMap_Board.ipynb) | 同じ手順で、組をボードごと(アノード 3 × カソード 3 = 9 組)にまとめたゲインマップ |
 | └ [`reference/GainMap_Calamity`](4_MakeCalibration/reference/GainMap_Calamity.ipynb) | 参照用: 研究室のプログラム Calamity と同じ手順(ピークの位置は `TSpectrum` のビンの位置)で作ったゲインマップ |
 
 シミュレーションのチュートリアルは別のフォルダ [`../tutorials_simulation/`](../tutorials_simulation/README.md) にあります。

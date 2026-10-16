@@ -80,7 +80,8 @@ SMILE_tool_box_v2.20 の `data/` 一式(174 MB)を使います。研究室の NA
 
 ## 5. 環境
 
-Geant4 と anlgeant4 は、実データの解析とは別の環境に入れています(`/usr/local` の ANLNext と EricaNext はそのまま)。
+Geant4、ANLNext、ComptonSoft(anlgeant4)を `~/opt` に入れています。ANLNext は 1 つで、実データの解析とシミュレーションの両方で使います
+(`/usr/local` の古い ANLNext は使わない)。
 
 | | 場所 |
 | --- | --- |
@@ -88,16 +89,16 @@ Geant4 と anlgeant4 は、実データの解析とは別の環境に入れて�
 | ANLNext(ベクトル型のパラメータ有効、`ANLNEXT_USE_G4VECTOR=ON`) | `~/opt/anlnext-g4` |
 | ComptonSoft(anlgeant4 を含む、Python 拡張あり) | `~/opt/comptonsoft` |
 
-作り方は `scripts/sim_env/`(`build_geant4.sh` → `build_anlnext_comptonsoft.sh`)、作業の記録は `docs/simulation_port_log.md` にあります。
-シミュレーションを使うときは、先に環境を読み込みます(`scripts/sim_env/setup_sim.sh` を `~/opt/` に置いたもの)。
+入れ方はリポジトリ直下の README の「インストール」(`scripts/env/install_all.sh`)、作業の記録は `docs/simulation_port_log.md` にあります。
+環境は `~/opt/setup_ericanext.sh`(`scripts/env/setup_ericanext.sh` の写し)が設定し、`~/.bashrc` で読み込みます。
 
 ```bash
-source ~/opt/setup_sim.sh
+source ~/opt/setup_ericanext.sh      # ~/.bashrc に書いておく
 ```
 
 - `GEANT4_BUILD_TLS_MODEL=global-dynamic` は、Python から Geant4 のライブラリを読み込むために必要です
   (既定の設定だと `cannot allocate memory in static TLS block` で止まる)。
-- anlgeant4 は ANLNext をベクトル型のパラメータ有効でビルドしてあることを前提にしているので、別に ANLNext を入れています。
-- 中性子のデータは G4NDL4.7.1 に **Ar-36 / Ar-38 のファイルを G4NDL4.5 から補ったもの**(`scripts/sim_env/make_g4ndl_ar36fix.sh` で作る、
-  `setup_sim.sh` が `G4NEUTRONHPDATA` に設定)。G4NDL4.7.1 のままだと Ar-36 が Ar-37 のデータで扱われ、Ar のガスに偽の (n,α) が入ります
+- anlgeant4 は ANLNext をベクトル型のパラメータ有効でビルドしてあることを前提にしています。実データの解析もこの ANLNext で同じ結果になります(`/usr/local` の ANLNext とビット単位で一致)。
+- 中性子のデータは G4NDL4.7.1 に **Ar-36 / Ar-38 のファイルを G4NDL4.5 から補ったもの**(`scripts/env/make_g4ndl_ar36fix.sh` で作る、
+  `setup_ericanext.sh` が `G4NEUTRONHPDATA` に設定)。G4NDL4.7.1 のままだと Ar-36 が Ar-37 のデータで扱われ、Ar のガスに偽の (n,α) が入ります
   (熱中性子で約 6.7 b。`docs/simulation_port_log.md`)。
