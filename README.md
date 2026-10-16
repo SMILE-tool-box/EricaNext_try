@@ -416,13 +416,15 @@ make -j8 && make install
 ```
 
 - **NAS を読める計算機では、設定ファイルを書き換えずにそのまま動きます。**
-- 手元のディスクにコピーして使う(読み込みが速くなる)ときや、別の場所に置いたときは、**同じ並び**で置いて、環境変数 `SMILE2P_DATA` に
-  **`calibration_data/` などがすぐ下にあるディレクトリ**(NAS の `SMILE2+` にあたる)を設定します。NAS の `EricaNext_try_data` をまるごとコピーした場合は、
-  その 1 つ上(中に `SMILE2+/` がある所)を設定しても構いません(`SMILE2+/` の中を使います)。
-  `{data_top}`, `{tpc_caldata}`, `{sim_data}`, `{parma_flux}` はすべて `SMILE2P_DATA` の下になります。
+- 手元のディスクにコピーして使う(読み込みが速くなる)ときや、別の場所に置いたときは、**NAS と同じ並び**で置いて、環境変数 `SMILE2P_DATA` に
+  **`calibration_data/`、`TPC_caldata/`、`simulation_data/` がすぐ下にあるディレクトリ**(NAS の `SMILE2+` にあたる)を指定します。
+  ほかの場所は探しません。違う場所を指定すると、その旨の注意を表示します。
 
   ```bash
-  export SMILE2P_DATA=~/EricaNext_try_data      # 中に calibration_data/, TPC_caldata/, simulation_data/
+  # NAS の SMILE2+ と同じ並びでコピーする例(使うものだけでよい)
+  mkdir -p ~/EricaNext_try_data/SMILE2+/calibration_data
+  rsync -av <user>@<hikaru か akari>:/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+/calibration_data/ ~/EricaNext_try_data/SMILE2+/calibration_data/
+  export SMILE2P_DATA=~/EricaNext_try_data/SMILE2+     # 中に calibration_data/, TPC_caldata/, simulation_data/
   ```
 
   Jupyter のカーネル「EricaNext」を使うときは、`SMILE2P_DATA` を設定したシェルで `bash scripts/env/make_jupyter_kernel.sh` を実行し直してください

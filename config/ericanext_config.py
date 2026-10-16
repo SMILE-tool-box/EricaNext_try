@@ -15,6 +15,7 @@ the home directory and "{data_top}" by data_top().
 """
 import json
 import os
+import sys
 from pathlib import Path
 
 CONFIG_DIR = Path(__file__).resolve().parent
@@ -26,17 +27,19 @@ CONFIG_DIR = Path(__file__).resolve().parent
 #   simulation_data/parameters/smile2p_sim_data/          simulation data (SMILE_tool_box_v2.20/data + emulator_param)
 #   simulation_data/parma_flux/                           PARMA cosmic-ray flux files (parma_flux_d<depth>_g10_thermal.root)
 # To use a copy elsewhere, keep the same layout and set $SMILE2P_DATA to the directory that holds calibration_data/ etc.
-# (= SMILE2+); the directory above it (a copy of the whole EricaNext_try_data) works too.
+# (= SMILE2+).
 DATA_DIR = "/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+"
 
 
 def data_root():
-    """Top of the data directory (the one with calibration_data/ etc. directly inside, = SMILE2+ on the NAS):
-    $SMILE2P_DATA, else DATA_DIR (the NAS). If $SMILE2P_DATA has no calibration_data/ but a SMILE2+/ (a copy of the
-    whole EricaNext_try_data directory), SMILE2+/ is used."""
+    """Top of the data directory: the one with calibration_data/, TPC_caldata/ and simulation_data/ directly inside
+    (= SMILE2+ on the NAS). $SMILE2P_DATA, else DATA_DIR (the NAS). No other directory is searched: when none of the
+    three is found there, a warning tells which directory was used."""
     root = Path(os.environ.get("SMILE2P_DATA", DATA_DIR)).expanduser()
-    if not (root / "calibration_data").is_dir() and (root / "SMILE2+" / "calibration_data").is_dir():
-        root = root / "SMILE2+"
+    if not any((root / d).is_dir() for d in ("calibration_data", "TPC_caldata", "simulation_data")):
+        src = "$SMILE2P_DATA" if "SMILE2P_DATA" in os.environ else "DATA_DIR (the NAS)"
+        print(f"ericanext_config: WARNING: no calibration_data/, TPC_caldata/ or simulation_data/ in {root} (from {src}). "
+              "SMILE2P_DATA must be the directory that holds them (= SMILE2+ on the NAS).", file=sys.stderr)
     return root
 
 
