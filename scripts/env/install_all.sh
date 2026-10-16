@@ -63,7 +63,14 @@ step 2 "neutron data" bash $HERE/make_g4ndl_ar36fix.sh
 step 3 "ANLNext and ComptonSoft" bash $HERE/build_anlnext_comptonsoft.sh
 step 4 "environment ~/opt/setup_ericanext.sh" setup_file
 step 5 "EricaNext_try" bash $HERE/build_ericanext.sh
-step 6 "Jupyter kernel" bash $HERE/make_jupyter_kernel.sh
+# the kernel needs Jupyter (jupyter_client, ipykernel) for /usr/bin/python3; without it the step is skipped (not marked done)
+if /usr/bin/python3 -c "import jupyter_client, ipykernel" 2>/dev/null; then
+  step 6 "Jupyter kernel" bash $HERE/make_jupyter_kernel.sh
+else
+  echo "=== step 6 (Jupyter kernel): skipped, Jupyter is not installed for /usr/bin/python3."
+  echo "    To use the tutorials: /usr/bin/python3 -m pip install --user jupyter ipykernel numpy matplotlib"
+  echo "    then run install_all.sh again (it registers the kernel)."
+fi
 cat <<MSG
 === done (log: $LOG)
   terminal: source ~/opt/setup_ericanext.sh   (only when you use EricaNext; put it in ~/.bashrc only if you use no other Geant4 / ANLNext)

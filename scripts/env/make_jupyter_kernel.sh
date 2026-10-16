@@ -14,6 +14,6 @@ spec = {"argv": [py, "-m", "ipykernel_launcher", "-f", "{connection_file}"],
         "display_name": "EricaNext", "language": "python", "env": env}
 json.dump(spec, open(os.path.join(d, "kernel.json"), "w"), indent=1)
 PYEOF
-jupyter kernelspec install --user --replace --name ericanext $DIR
+$PY -m jupyter kernelspec install --user --replace --name ericanext $DIR   # not the jupyter command: it may not be in PATH
 rm -r $DIR
 echo "kernel 'EricaNext' registered (jupyter kernelspec list)"
