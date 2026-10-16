@@ -1,13 +1,17 @@
 # Environment for EricaNext_try (data reconstruction and simulation):
-# Geant4 + ANLNext built with Geant4-CLHEP vectors + ComptonSoft (anlgeant4), all under ~/opt.
-# Usage:  source ~/opt/setup_ericanext.sh   (install_all.sh copies this file to ~/opt; ~/.bashrc sources it)
+# Geant4 + ANLNext built with Geant4-CLHEP vectors + ComptonSoft (anlgeant4).
+# Usage:  source ~/opt/setup_ericanext.sh   (install_all.sh copies this file to ~/opt with the Geant4 it used)
+#   - source it only when you use EricaNext (or from ~/.bashrc if you use no other Geant4 / ANLNext):
+#     it puts this Geant4 and ANLNext first in PATH, LD_LIBRARY_PATH and PYTHONPATH.
+#   - Jupyter: choose the kernel "EricaNext" (make_jupyter_kernel.sh) instead.
 # ANLNext needs libG4clhep.so even for `import anlnext`, so the data chain needs this environment too.
-source $HOME/opt/geant4-11.4.3/bin/geant4.sh
+# The neutron data (G4NEUTRONHPDATA) is set by the simulation config files (environment section), not here.
+export GEANT4_INSTALL=$HOME/opt/geant4-11.4.3
 export ANLNEXT_INSTALL=$HOME/opt/anlnext-g4
 export COMPTONSOFT_INSTALL=$HOME/opt/comptonsoft
-export LD_LIBRARY_PATH=$COMPTONSOFT_INSTALL/lib:$ANLNEXT_INSTALL/lib:$HOME/opt/geant4-11.4.3/lib64:${LD_LIBRARY_PATH:-}
+source $GEANT4_INSTALL/bin/geant4.sh
+_g4lib=$(dirname "$(dirname "$(dirname "$(ls $GEANT4_INSTALL/lib*/cmake/Geant4*/Geant4Config.cmake | head -1)")")")
+export LD_LIBRARY_PATH=$COMPTONSOFT_INSTALL/lib:$ANLNEXT_INSTALL/lib:$_g4lib:${LD_LIBRARY_PATH:-}
 export PYTHONPATH=$COMPTONSOFT_INSTALL/lib/python:$ANLNEXT_INSTALL/lib/python:${PYTHONPATH:-}
 export RUBYLIB=$ANLNEXT_INSTALL/lib/ruby:${RUBYLIB:-}
-# Neutron data: G4NDL4.7.1 + the Ar-36/38 files of G4NDL4.5 (make_g4ndl_ar36fix.sh);
-# plain G4NDL4.7.1 treats Ar-36 with the Ar-37 data (spurious (n,alpha) in the TPC gas).
-export G4NEUTRONHPDATA=$HOME/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix
+unset _g4lib

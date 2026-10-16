@@ -496,3 +496,11 @@ SMILE_tool_box と同じ振る舞いなので今は直さないが、SMILE-3 で
 - 新しい環境で、実データ(Per02)とシミュレーション(seed 1、2 万個)が前と同じ出力。全チュートリアル(24 冊)を実行し直してすべて完了。
 - 別件: 10 月 12 日に作ったチュートリアル用の `cache/Per02_50000.root` と今のビルドの出力が `Ve_TRA`, `Ve_TRA_fit_status`, `Ve_TRA_grad_err` で
   わずかに違う(grad_err の相対差 10⁻⁷ 程度、fit_status 4 → 0 が 6 行)。ANLNext とは無関係(`/usr/local` のビルドでも同じ)。原因は未調査。
+- 同日: ほかの Geant4 / ANLNext を使っている人の環境を壊さない形にした(小野田と相談、仮想環境は使わない)。
+  - `setup_ericanext.sh` は `~/.bashrc` に書かず使うときだけ読み込むのを標準にし、README に注意を書いた(小野田の環境は `~/.bashrc` で読み込むまま)。
+    `G4NEUTRONHPDATA` は設定しない(シミュレーションの設定ファイルの `environment` で `run_sim.py` が設定。試験のスクリプト 2 つは自分で設定)。
+  - Jupyter のカーネル「EricaNext」(`make_jupyter_kernel.sh`、kernel.json の env に環境変数)。環境変数の無いシェルから、このカーネルで
+    DataIO(実データ・シミュレーション)と GainMap_Board が完了し、カーネルの環境だけで `run_chain.py` と `run_sim.py` が動くことを確認。
+  - 既にある Geant4 を `GEANT4_INSTALL` で使えるようにした: `geant4_paths.sh`(場所の決定)、`check_geant4.sh`(GDML、TLS のモデル、物理データ、版)。
+    `build_anlnext_comptonsoft.sh`, `make_g4ndl_ar36fix.sh`(その Geant4 の G4NDL を使う)、`setup_ericanext.sh` は `~/opt/geant4-11.4.3` の決め打ちをやめた。
+    既にある Geant4 での実際の通しの試験はしていない(この環境には別の Geant4 が無い)。

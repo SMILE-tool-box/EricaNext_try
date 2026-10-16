@@ -104,7 +104,7 @@ a.run(n_events)
 設定ファイルの書き方は [`config/README.md`](../config/README.md) にあります。
 
 ```bash
-# 環境(Geant4、ANLNext、ComptonSoft)は ~/.bashrc で読み込む ~/opt/setup_ericanext.sh が設定する
+source ~/opt/setup_ericanext.sh     # 環境(Geant4、ANLNext、ComptonSoft)。~/.bashrc で読み込んでいれば不要
 cd EricaNext_try/run_script
 python3 run_sim.py <設定名> -n <一次粒子の数> [-o <出力ファイル>] [--seed <種>] [--raw-dir <ディレクトリ>] [--set 節.キー=値 ...]
 ```

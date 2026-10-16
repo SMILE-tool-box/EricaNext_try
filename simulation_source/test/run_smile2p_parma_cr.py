@@ -6,6 +6,10 @@ Run after `source ~/opt/setup_ericanext.sh`:
 import argparse, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "install", "lib", "python"))
+# neutron data with the Ar-36/38 files (as config/simulation/*.json environment.G4NEUTRONHPDATA); set before Geant4 starts
+_ndl = os.path.expanduser("~/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix")
+if os.path.isdir(_ndl):
+    os.environ["G4NEUTRONHPDATA"] = _ndl
 import anlnext
 import anlgeant4
 import EricaSimPy as sim

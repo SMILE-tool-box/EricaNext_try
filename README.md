@@ -251,7 +251,7 @@ ANLNext は 1 つ(`~/opt/anlnext-g4`)で、実データの解析(`source/`)と�
 
 ### 1. Geant4、ANLNext、ComptonSoft、EricaNext を入れる
 
-スクリプト 1 本で、すべて `~/opt` に入れて EricaNext_try をビルドします(`/usr/local` は変えない)。
+スクリプト 1 本で、すべて `~/opt` に入れて EricaNext_try をビルドします。`~/opt` の外(`/usr/local`、`~/.bashrc` など)は変えません。
 
 ```bash
 bash scripts/env/install_all.sh
@@ -264,25 +264,45 @@ bash scripts/env/install_all.sh
 | 3 | `scripts/env/build_anlnext_comptonsoft.sh` | ANLNext を `~/opt/anlnext-g4` に、ComptonSoft を `~/opt/comptonsoft` に(ソースが無ければ GitHub から取ってくる) |
 | 4 | (コピー) | 環境を設定する `scripts/env/setup_ericanext.sh` を `~/opt/setup_ericanext.sh` に置く |
 | 5 | `scripts/env/build_ericanext.sh` | EricaNext_try をビルド: 実データの解析 `source/ → install/`、シミュレーション `simulation_source/ → simulation_source/install/` |
+| 6 | `scripts/env/make_jupyter_kernel.sh` | Jupyter のカーネル「EricaNext」を登録(環境変数をカーネルに書いておく。ROOT の環境もそのとき写すので、`thisroot.sh` を読んだシェルで実行する) |
 
 コードを直したあとに EricaNext_try だけをビルドし直すときは、5 だけを実行します(`bash scripts/env/build_ericanext.sh`)。
 
-### 2. 環境を設定する
-
-`~/.bashrc` に次の 1 行を書きます(ROOT の `thisroot.sh` の後)。ターミナルでも Jupyter でも、この環境で動きます。
+**Geant4 がすでに入っている場合**は、それを使えます(Geant4 をもう一つ入れない)。`GEANT4_INSTALL` にその場所(`bin/geant4.sh` がある所)を渡します。
 
 ```bash
-source ~/opt/setup_ericanext.sh
+GEANT4_INSTALL=/path/to/geant4 bash scripts/env/check_geant4.sh    # 使えるか確かめるだけ
+GEANT4_INSTALL=/path/to/geant4 bash scripts/env/install_all.sh
 ```
 
-`setup_ericanext.sh` は、Geant4 の環境、`ANLNEXT_INSTALL=~/opt/anlnext-g4`、ComptonSoft の場所、`LD_LIBRARY_PATH`、`PYTHONPATH`、
-中性子のデータ(`G4NEUTRONHPDATA`)を設定します。ANLNext は `import anlnext` だけでも Geant4 のライブラリ(`libG4clhep.so`)を使うので、
-実データの解析にもこの環境が要ります。**Jupyter や VS Code は、`~/.bashrc` を書き換えた後に起動し直してください。**
+`check_geant4.sh` が、GDML が有効か、マルチスレッドのときに TLS のモデルが `global-dynamic` か(でないと Python から Geant4 を読み込めない)、
+物理データがそろっているか、版(確かめたのは 11.4.3)を調べ、使えなければ理由を表示して止まります。その Geant4 自体は変えません。
+
+### 2. 環境を設定する
+
+EricaNext は、`~/opt` の Geant4、ANLNext、ComptonSoft を使います。その場所は `~/opt/setup_ericanext.sh` が環境変数
+(`PATH`, `LD_LIBRARY_PATH`, `PYTHONPATH`, `ANLNEXT_INSTALL` など)で設定します。
+ANLNext は `import anlnext` だけでも Geant4 のライブラリ(`libG4clhep.so`)を使うので、実データの解析にもこの環境が要ります。
+
+| 使い方 | すること |
+| --- | --- |
+| ターミナル | 使うときに `source ~/opt/setup_ericanext.sh` してから `run_chain.py` / `run_sim.py` を実行する |
+| Jupyter | カーネル「**EricaNext**」を選ぶ(環境変数がカーネルに書いてあるので、何も読み込まなくてよい) |
+
+> **ほかの Geant4 や ANLNext を使っている人は、`setup_ericanext.sh` を `~/.bashrc` に書かないでください。**
+> `PATH`、`LD_LIBRARY_PATH`、`PYTHONPATH`、`ANLNEXT_INSTALL` がこの Geant4・ANLNext を指すようになり、
+> 自分のコードのビルドや実行、Geant4 の物理データの場所が変わってしまいます。EricaNext を使うときだけ読み込むか、Jupyter のカーネルを使ってください。
+> ほかに使っていなければ、`~/.bashrc` に `source ~/opt/setup_ericanext.sh` を書いても構いません(ROOT の `thisroot.sh` の後)。
+
+中性子のデータ(`G4NEUTRONHPDATA`、Ar-36/38 を補った G4NDL)は、環境ではなくシミュレーションの設定ファイルの `environment` の節で指定します
+(`run_sim.py` がその実行の中だけで設定する)。
 
 確認:
 
 ```bash
+source ~/opt/setup_ericanext.sh
 python3 -c "import anlnext, anlgeant4; print(anlnext.__file__)"     # ~/opt/anlnext-g4/lib/python/anlnext/__init__.py
+jupyter kernelspec list                                             # ericanext があること
 ```
 
 ### ANLNext のビルドのオプション

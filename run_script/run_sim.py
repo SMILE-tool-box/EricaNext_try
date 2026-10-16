@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Run the EricaNext simulation (Geant4 via anlgeant4) with a configuration from
-config/simulation/*.json (environment: ~/opt/setup_ericanext.sh, sourced in ~/.bashrc).
+config/simulation/*.json (environment: source ~/opt/setup_ericanext.sh first, or the Jupyter kernel EricaNext).
 
     python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1
     python3 run_sim.py my_setting.json -n 1000 -o test.root --set physics.em_msc=urban

@@ -90,15 +90,16 @@ Geant4、ANLNext、ComptonSoft(anlgeant4)を `~/opt` に入れています。ANL
 | ComptonSoft(anlgeant4 を含む、Python 拡張あり) | `~/opt/comptonsoft` |
 
 入れ方はリポジトリ直下の README の「インストール」(`scripts/env/install_all.sh`)、作業の記録は `docs/simulation_port_log.md` にあります。
-環境は `~/opt/setup_ericanext.sh`(`scripts/env/setup_ericanext.sh` の写し)が設定し、`~/.bashrc` で読み込みます。
+環境は `~/opt/setup_ericanext.sh`(`scripts/env/setup_ericanext.sh` の写し)が設定します。ターミナルでは使うときに読み込み、
+Jupyter ではカーネル「EricaNext」を選びます(README の「2. 環境を設定する」。ほかの Geant4 を使っている人は `~/.bashrc` に書かない)。
 
 ```bash
-source ~/opt/setup_ericanext.sh      # ~/.bashrc に書いておく
+source ~/opt/setup_ericanext.sh
 ```
 
 - `GEANT4_BUILD_TLS_MODEL=global-dynamic` は、Python から Geant4 のライブラリを読み込むために必要です
   (既定の設定だと `cannot allocate memory in static TLS block` で止まる)。
 - anlgeant4 は ANLNext をベクトル型のパラメータ有効でビルドしてあることを前提にしています。実データの解析もこの ANLNext で同じ結果になります(`/usr/local` の ANLNext とビット単位で一致)。
 - 中性子のデータは G4NDL4.7.1 に **Ar-36 / Ar-38 のファイルを G4NDL4.5 から補ったもの**(`scripts/env/make_g4ndl_ar36fix.sh` で作る、
-  `setup_ericanext.sh` が `G4NEUTRONHPDATA` に設定)。G4NDL4.7.1 のままだと Ar-36 が Ar-37 のデータで扱われ、Ar のガスに偽の (n,α) が入ります
+  シミュレーションの設定ファイルの `environment.G4NEUTRONHPDATA` で指定し、`run_sim.py` が設定)。G4NDL4.7.1 のままだと Ar-36 が Ar-37 のデータで扱われ、Ar のガスに偽の (n,α) が入ります
   (熱中性子で約 6.7 b。`docs/simulation_port_log.md`)。
