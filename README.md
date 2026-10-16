@@ -236,7 +236,7 @@ flowchart TD
 | C++ コンパイラ | C++17 | システム |
 | [SWIG](https://www.swig.org/) | | システム(Python 拡張の生成に必須) |
 | Python 3 | 3.9 で確認 | システム(`/usr/bin/python3`) |
-| Jupyter、ipykernel、numpy、matplotlib | | チュートリアル用(`/usr/bin/python3 -m pip install --user jupyter ipykernel numpy matplotlib`)。無くても EricaNext のビルドと `run_chain.py` / `run_sim.py` は動く |
+| Jupyter、ipykernel、numpy、matplotlib | | チュートリアル用(`/usr/bin/python3 -m pip install --user --upgrade jupyter ipykernel numpy matplotlib`)。無くても EricaNext のビルドと `run_chain.py` / `run_sim.py` は動く |
 | Ruby の開発用ヘッダ、readline | | システム(ANLNext が Ruby の拡張をいつも作るため) |
 | xerces-c、expat | | システム(Geant4 の GDML 用。例 `sudo dnf install xerces-c-devel expat-devel`) |
 | [Geant4](https://geant4.web.cern.ch/) | 11.4.3 | 下の `install_all.sh` が `~/opt` に入れる |
@@ -318,7 +318,9 @@ GEANT4_INSTALL=/path/to/geant4 bash scripts/env/install_all.sh
 | ComptonSoft のビルドで `BasicModule.hh` の `help_duplication` が `use of deleted function ‘std::unique_ptr ... (const std::unique_ptr&)’` | ANLNext の版が新しすぎる(確かめたのは c22eb3e、GitHub の最新 9898a47 などでは ComptonSoft bbe3486 が GCC 11 / C++17 で通らない)。`build_anlnext_comptonsoft.sh` は `~/ANLNext` が c22eb3e でなければそれを使わずに `~/opt/src/ANLNext` に c22eb3e を取ってくるので、`install_all.sh` をもう一度実行する(手順 3 から続く) |
 | ダウンロード(Geant4、物理データ約 2 GB、G4NDL4.5、GitHub)で止まる | ネットワーク。研究室の外のサイト(github.com、cern.ch)に出られるか確かめて、もう一度実行する |
 | 書き込みに失敗する | ディスクの空き。Geant4 のビルドと物理データで数 GB〜10 GB 程度が要る |
-| 手順 6 が「Jupyter is not installed」で飛ばされる | `/usr/bin/python3` に Jupyter が無い。チュートリアルを使うなら `/usr/bin/python3 -m pip install --user jupyter ipykernel numpy matplotlib` のあと、`install_all.sh` をもう一度実行する(手順 6 だけ実行される) |
+| 手順 6 が「Jupyter is not installed」で飛ばされる | `/usr/bin/python3` に Jupyter が無い。チュートリアルを使うなら `/usr/bin/python3 -m pip install --user --upgrade jupyter ipykernel numpy matplotlib` のあと、`install_all.sh` をもう一度実行する(手順 6 だけ実行される) |
+| ノートブックの `import matplotlib.pyplot` で `AttributeError: module 'matplotlib' has no attribute '__version_info__'` | システムの古い matplotlib(`/usr/lib64/python3.9/site-packages`)と、`pip install --user jupyter` で入った新しい `matplotlib-inline` が合わない(`pip install --user matplotlib` は、システムに matplotlib があると新しい版を入れない)。`/usr/bin/python3 -m pip install --user --upgrade matplotlib` で `~/.local` に新しい版を入れ、カーネルを再起動する |
+| ノートブックで `FileNotFoundError: ... /mnt/nas_eureka/...` | その計算機から NAS が見えない(hikaru / akari サーバー以外)。hikaru / akari で使うか、データをコピーして `SMILE2P_DATA` を設定し、カーネルを登録し直す(「データの置き場所」) |
 | `check_geant4.sh` が NG を出す(既にある Geant4) | 表示された理由(GDML、TLS のモデル、物理データ)を直すか、`GEANT4_INSTALL` を付けずに実行して `~/opt` に入れる |
 
 ### 2. 環境を設定する
@@ -420,6 +422,9 @@ make -j8 && make install
   ```bash
   export SMILE2P_DATA=~/EricaNext_try_data      # 中に calibration_data/, TPC_caldata/, simulation_data/
   ```
+
+  Jupyter のカーネル「EricaNext」を使うときは、`SMILE2P_DATA` を設定したシェルで `bash scripts/env/make_jupyter_kernel.sh` を実行し直してください
+  (カーネルに書き込まれる。VS Code などから開いたノートブックには、ターミナルの `export` は届かないことがある)。
 
 並びが違う場所に置いた場合だけ、設定ファイル(例: `config/smile2p_20190701_Per02.json`)の次の値を自分のパスに書き換えます。
 `{data_top}` を使わずに絶対パスを書いても構いません。

@@ -68,7 +68,7 @@ if /usr/bin/python3 -c "import jupyter_client, ipykernel" 2>/dev/null; then
   step 6 "Jupyter kernel" bash $HERE/make_jupyter_kernel.sh
 else
   echo "=== step 6 (Jupyter kernel): skipped, Jupyter is not installed for /usr/bin/python3."
-  echo "    To use the tutorials: /usr/bin/python3 -m pip install --user jupyter ipykernel numpy matplotlib"
+  echo "    To use the tutorials: /usr/bin/python3 -m pip install --user --upgrade jupyter ipykernel numpy matplotlib"
   echo "    then run install_all.sh again (it registers the kernel)."
 fi
 cat <<MSG
