@@ -19,7 +19,9 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$OPT/anlnext-g4 -DANLNEXT_USE_G4VECTOR=ON \
   -DCMAKE_INSTALL_RPATH="$OPT/anlnext-g4/lib;$G4_LIBDIR"
 make -j$J && make install
 
-# --- ComptonSoft: GDML + Python, no Qt / Ruby (other optional libraries are OFF by default).
+# --- ComptonSoft: installed only for anlgeant4 (Geant4 as ANLNext modules: Geant4Body, VANLGeometry, BasicPrimaryGen, ...),
+#     which exists only inside the ComptonSoft repository; the ComptonSoft detector simulation itself is not used.
+#     GDML + Python, no Qt / Ruby (other optional libraries are OFF by default).
 #     Do not pass CS_ALL_OFF: it would switch GDML off again.
 cd $OPT/src
 [ -d ComptonSoft ] || { git clone https://github.com/odakahirokazu/ComptonSoft.git; git -C ComptonSoft checkout bbe3486; }

@@ -504,3 +504,14 @@ SMILE_tool_box と同じ振る舞いなので今は直さないが、SMILE-3 で
   - 既にある Geant4 を `GEANT4_INSTALL` で使えるようにした: `geant4_paths.sh`(場所の決定)、`check_geant4.sh`(GDML、TLS のモデル、物理データ、版)。
     `build_anlnext_comptonsoft.sh`, `make_g4ndl_ar36fix.sh`(その Geant4 の G4NDL を使う)、`setup_ericanext.sh` は `~/opt/geant4-11.4.3` の決め打ちをやめた。
     既にある Geant4 での実際の通しの試験はしていない(この環境には別の Geant4 が無い)。
+
+## 2026-10-16 GDML の形状の図
+
+- `run_sim.py --gdml <ファイル>`(anlgeant4 `WriteGDML` をチェーンの最後につなぐ)。flight の形状は 54 MB(`-n 1` で約 30 秒)。
+- ROOT(`TGeoManager::Import`)では GDML を読めるが、レイトレースはバッチだと白紙、ワイヤーフレームは見づらい。
+  anlgeant4 の `VisualizeG4Geom` は可視化なしの ComptonSoft のビルドでは Python に無い。
+  → EricaSimPy に `GeometryImage` を追加: `G4VisExecutive` を起こし、`commands` の可視化のコマンドを順に実行。`TSG_OFFSCREEN` で画面無しに PNG を書く。
+  HA のピクセルは約 2.7 万個の立体なので、立体の名前の一部で色と表示を決める `colours`, `hide` も付けた。平面で切る(`addCutawayPlane`)と
+  テッセレーションの立体が描けない(Polyhedron not available)ので、隠す方法にした。光の向きは見る向きにそろえる(既定だと上から見たとき暗い)。
+- `run_script/draw_geometry.py`: GDML を `ReadGDML` で読み、`outside`, `detector`, `top` の 3 枚。上からの図は右 +x、下 +y(HA 1 を赤くして確認)。
+- 図を `tutorials_simulation/1_DataIO/modules/1_SMILE2pGeometry/`(5 節)と `tutorials_simulation/0_Introduction/README.md`(3 節、`images/`)に入れた。

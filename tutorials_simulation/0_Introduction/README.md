@@ -63,6 +63,21 @@ SMILE_tool_box の `SMILE_2p_Geo` は **GDML を使っていません**。形状
 形状が 1 つのファイルにまとまり、中身を確認したり他の Geant4 のツールで表示したりできます。
 SMILE-3 の形状(まだ作っていない)も、GDML で作れば同じ仕組みに載せられます。
 
+今の状態: 1 と 2 はできています(`run_script/run_sim.py --gdml <ファイル>`)。今の設定ファイルのシミュレーションは、まだ `SMILE2pGeometry` で毎回組み立てています(3 はこれから)。
+
+### GDML で書き出した SMILE-2+(flight)の形状
+
+`run_script/draw_geometry.py` で、書き出した GDML(`smile2p_flight.gdml`、54 MB)を Geant4 に読み込み、画面無しの可視化(`TSG_OFFSCREEN`)で描いたものです。
+作り方と色の意味は `../1_DataIO/modules/1_SMILE2pGeometry/SMILE2pGeometry.ipynb` の 5 節にあります。z 軸は下向きなので、図の上が −z(空の側)です。
+
+| 外から見た形(圧力容器、ゴンドラの脚、バラスト) | 検出器(ゴンドラ、圧力容器、アンチ、支えの構造を隠したもの) |
+| --- | --- |
+| ![outside](images/smile2p_flight_outside.png) | ![detector](images/smile2p_flight_detector.png) |
+
+上から見た HA の並び(TPC の中身も隠したもの)。底面の HA 6 台と側面の HA 12 台。右が +x、下が +y です。
+
+<img src="images/smile2p_flight_top.png" width="450">
+
 ## 4. 必要なデータ
 
 SMILE_tool_box_v2.20 の `data/` 一式(174 MB)を使います。研究室の NAS の `/mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+/simulation_data/parameters/smile2p_sim_data/`
@@ -87,7 +102,7 @@ Geant4、ANLNext、ComptonSoft(anlgeant4)を `~/opt` に入れています。ANL
 | --- | --- |
 | Geant4 11.4.3(GDML、マルチスレッド、`GEANT4_BUILD_TLS_MODEL=global-dynamic`) | `~/opt/geant4-11.4.3`(物理データは `~/opt/geant4-data-11.4.3`) |
 | ANLNext(ベクトル型のパラメータ有効、`ANLNEXT_USE_G4VECTOR=ON`) | `~/opt/anlnext-g4` |
-| ComptonSoft(anlgeant4 を含む、Python 拡張あり) | `~/opt/comptonsoft` |
+| ComptonSoft(**anlgeant4 を使うために入れる**。ComptonSoft 本体は使わない。Python 拡張あり) | `~/opt/comptonsoft` |
 
 入れ方はリポジトリ直下の README の「インストール」(`scripts/env/install_all.sh`)、作業の記録は `docs/simulation_port_log.md` にあります。
 環境は `~/opt/setup_ericanext.sh`(`scripts/env/setup_ericanext.sh` の写し)が設定します。ターミナルでは使うときに読み込み、

@@ -4,6 +4,7 @@
 | --- | --- |
 | [`run_chain.py`](run_chain.py) | 設定ファイル(`config/*.json`)を指定して EricaNext の再構成のチェーンを実行する。**通常はこれを使う** |
 | [`run_sim.py`](run_sim.py) | 設定ファイル(`config/simulation/*.json`)を指定してシミュレーションを実行する。**シミュレーションはこれを使う** |
+| [`draw_geometry.py`](draw_geometry.py) | GDML の形状を、画面無しで PNG の図に描く(外から、検出器、上から HA の並び) |
 | [`run_per02.py`](run_per02.py) | Per02 の全イベントを再構成する(`run_chain.py` を決まった引数で呼ぶだけ) |
 | [`compare_with_reference.py`](compare_with_reference.py) | 出力を SMILE_tool_box の参照出力とイベントごとに比較する |
 | [`check_drift_velocity.py`](check_drift_velocity.py) | 作ったドリフト速度の表を、データに付いているものと比べる |
@@ -116,6 +117,7 @@ python3 run_sim.py <設定名> -n <一次粒子の数> [-o <出力ファイル>]
 | `-o`, `--output` | エネルギー損失のツリーを書く ROOT ファイル(`pickup` の最初のモジュールの `output`)。省略すると設定ファイルの値 |
 | `--seed` | 乱数の種(`geant4.random_seed`)。`response` のモジュールの種は `seed × 100 + 1`、`+ 2`、… になる。省略すると設定ファイルの値 |
 | `--raw-dir` | raw ファイルの出力先(`RawWriter2p.output_dir`)。`sim_truth.root` と、HAEmulator が書く `Cal_HA*.dat` もここに置く。`response` の節がある設定だけで使う |
+| `--gdml <ファイル>` | 形状を GDML に書き出す(anlgeant4 の `WriteGDML`)。形状だけが欲しいときは `-n 1` |
 | `--set 節.キー=値` | 設定ファイルの値をその場で上書き(何回でも)。値は JSON として読む。`physics.em_msc=urban`、`environment.G4NEUTRONHPDATA=/path`、`pickup.output=a.root`(`pickup` の最初のモジュール)、`response.TPCEmulator.Vth_Anode=6000`(`response` はモジュール名も書く) |
 
 ### 例
@@ -166,6 +168,26 @@ chain.run(n)
 ```
 
 モジュールは `EricaSimPy`(`simulation_source/modules/`)、無ければ anlgeant4 から探します。
+
+---
+
+## draw_geometry.py
+
+GDML の形状を Geant4 に読み込み(anlgeant4 の `ReadGDML`)、画面無しの可視化(Geant4 の `TSG_OFFSCREEN`、EricaSimPy の `GeometryImage`)で PNG に描きます。
+
+```bash
+python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1 -o /tmp/edep.root --gdml smile2p_flight.gdml   # 形状だけを書き出す
+python3 draw_geometry.py smile2p_flight.gdml -o images/            # images/smile2p_flight_{outside,detector,top}.png
+python3 draw_geometry.py smile2p_flight.gdml -o images/ --views top
+```
+
+| 図(`--views`) | 中身 |
+| --- | --- |
+| `outside` | 全体(ゴンドラ、圧力容器、バラスト) |
+| `detector` | ゴンドラ、圧力容器、アンチ、支えの構造を隠したもの(TPC と HA) |
+| `top` | 上(−z)から見た HA の並び(TPC の中身も隠す)。右が +x、下が +y |
+
+色と隠す立体は、スクリプトの `COLOURS`(立体の名前に含まれる文字列 → 色)と `VIEWS` で決めています。z 軸が下向きなので、上の向きを −z にしています。
 
 ---
 

@@ -188,6 +188,7 @@ flowchart TD
 | `HAEmulator` | `Emu_HA` | HA の ADC、`Cal_HA*.dat` |
 | `RawWriter2p` | `EmuWrite2p` | raw ファイル、真の値 `sim_truth.root` |
 | `StepLimit` | (なし) | ステップの長さの上限(今の設定ファイルでは使っていない) |
+| `GeometryImage` | (なし) | 形状を画面無しで PNG に描く(`run_script/draw_geometry.py` が使う) |
 
 ## 検証状況
 
@@ -239,7 +240,11 @@ flowchart TD
 | xerces-c、expat | | システム(Geant4 の GDML 用。例 `sudo dnf install xerces-c-devel expat-devel`) |
 | [Geant4](https://geant4.web.cern.ch/) | 11.4.3 | 下の `install_all.sh` が `~/opt` に入れる |
 | [ANLNext](https://github.com/odakahirokazu/ANLNext) | c22eb3e | 同上(ベクトル型のパラメータ有効) |
-| [ComptonSoft](https://github.com/odakahirokazu/ComptonSoft)(anlgeant4) | bbe3486 | 同上 |
+| [ComptonSoft](https://github.com/odakahirokazu/ComptonSoft) | bbe3486 | 同上。**中に入っている anlgeant4 を使うために入れる**(ComptonSoft 本体は使わない。シミュレーションだけで使う) |
+
+ComptonSoft は、ANLNext のモジュールとして Geant4 を動かす部品 **anlgeant4**(`Geant4Body`、`VANLGeometry`、`VANLPhysicsList`、`BasicPrimaryGen`、
+`PointSourcePrimaryGen`、`StandardUserActionAssembly` など)を使うために入れます。anlgeant4 は ComptonSoft のリポジトリの中(`anlgeant4/`)にしか無く、
+ComptonSoft の CMake には anlgeant4 だけを作るオプションが無いので、ComptonSoft ごとビルドします。実データの解析には要りません。
 
 ANLNext は 1 つ(`~/opt/anlnext-g4`)で、実データの解析(`source/`)とシミュレーション(`simulation_source/`)の両方で使います。
 シミュレーションの anlgeant4 がベクトル型のパラメータ(`ANLNEXT_USE_G4VECTOR=ON`)を必要とするのでそのようにビルドしています。
@@ -261,7 +266,7 @@ bash scripts/env/install_all.sh
 | --- | --- | --- |
 | 1 | `scripts/env/build_geant4.sh` | Geant4 11.4.3 を `~/opt/geant4-11.4.3` に(GDML、マルチスレッド、`GEANT4_BUILD_TLS_MODEL=global-dynamic`)。物理データ(約 2 GB)は初回だけ `~/opt/geant4-data-11.4.3` にダウンロード |
 | 2 | `scripts/env/make_g4ndl_ar36fix.sh` | 中性子のデータ G4NDL4.7.1 に G4NDL4.5 の Ar-36/38 を補ったもの(`~/opt/geant4-data-extra/G4NDL4.7.1_Ar36fix`) |
-| 3 | `scripts/env/build_anlnext_comptonsoft.sh` | ANLNext を `~/opt/anlnext-g4` に、ComptonSoft を `~/opt/comptonsoft` に(ソースが無ければ GitHub から取ってくる) |
+| 3 | `scripts/env/build_anlnext_comptonsoft.sh` | ANLNext を `~/opt/anlnext-g4` に、ComptonSoft(anlgeant4 を使うため)を `~/opt/comptonsoft` に(ソースが無ければ GitHub から取ってくる) |
 | 4 | (コピー) | 環境を設定する `scripts/env/setup_ericanext.sh` を `~/opt/setup_ericanext.sh` に置く |
 | 5 | `scripts/env/build_ericanext.sh` | EricaNext_try をビルド: 実データの解析 `source/ → install/`、シミュレーション `simulation_source/ → simulation_source/install/` |
 | 6 | `scripts/env/make_jupyter_kernel.sh` | Jupyter のカーネル「EricaNext」を登録(環境変数をカーネルに書いておく。ROOT の環境もそのとき写すので、`thisroot.sh` を読んだシェルで実行する) |
@@ -353,6 +358,10 @@ make -j8 && make install
 #### データの置き場所(自分の環境に合わせて変える場所)
 
 データはリポジトリに入っていません。研究室の NAS の、EricaNext_try のデータの置き場にまとめてあります。
+
+> **NAS(`/mnt/nas_eureka`)へのつなぎ方**: 宇宙線研究室の hikaru サーバー、または akari サーバーに VPN でつないで使います
+> (NAS はこれらのサーバーにマウントされています)。VPN のつなぎ方は SMILE の wiki のマニュアル
+> [Erica_manual.pdf](http://192.168.1.172/smile_wiki/gitlab?action=AttachFile&do=view&target=Erica_manual.pdf)(研究室のネットワークの中から見られる)を参照してください。
 
 ```
 /mnt/nas_eureka/onoda/EricaNext_try_data/SMILE2+/     ← config/ericanext_config.py の DATA_DIR(環境変数 SMILE2P_DATA で変えられる)

@@ -5,6 +5,7 @@ config/simulation/*.json (environment: source ~/opt/setup_ericanext.sh first, or
     python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1000000 -o out.root --seed 1
     python3 run_sim.py my_setting.json -n 1000 -o test.root --set physics.em_msc=urban
     python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10_raw -n 100000 -o edep.root --raw-dir rawdata
+    python3 run_sim.py smile2p_flight_parma_thermal_neutron_d10 -n 1 -o /tmp/edep.root --gdml smile2p_flight.gdml   # geometry only
 
 The config has the sections environment, detector, physics, source, geant4, pickup and
 (optional) response (see config/README.md). The chain is
@@ -80,6 +81,7 @@ def main():
     ap.add_argument("-o", "--output", help="output ROOT file of the first pickup module")
     ap.add_argument("--seed", type=int, help="random seed (geant4.random_seed; the response modules use seed*100 + 1, + 2, ...)")
     ap.add_argument("--raw-dir", help="directory of the raw files (RawWriter2p.output_dir); the sim tree goes to <dir>/sim_truth.root")
+    ap.add_argument("--gdml", metavar="FILE", help="also write the geometry to this GDML file (anlgeant4 WriteGDML)")
     ap.add_argument("--set", action="append", default=[], metavar="SECTION.KEY=VALUE",
                     help="override a parameter, e.g. physics.em_msc=urban (repeatable)")
     args = ap.parse_args()
@@ -117,6 +119,9 @@ def main():
         add_module(chain, entry)
     for entry in cfg.get("response", []):
         add_module(chain, entry)
+    if args.gdml:
+        chain.chain(anlgeant4.WriteGDML)
+        chain.with_parameters({"file": args.gdml})
     from anl_run import run_checked
     if not run_checked(chain, args.n_events):
         sys.exit(1)

@@ -10,6 +10,7 @@
 #include "TPCEmulator.hh"
 #include "HAEmulator.hh"
 #include "RawWriter2p.hh"
+#include "GeometryImage.hh"
 %}
 
 %import(module="anlnext.anlnextpy") "anlnext/python/anlnextpy.i"
@@ -24,4 +25,5 @@ class SimTrigger       : public anlnext::BasicModule {};
 class TPCEmulator      : public anlnext::BasicModule {};
 class HAEmulator       : public anlnext::BasicModule {};
 class RawWriter2p      : public anlnext::BasicModule {};
+class GeometryImage    : public anlnext::BasicModule {};
 }
